@@ -67,7 +67,7 @@
   <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#1E1E1E]/80 border-b border-gray-200 dark:border-gray-800 acrylic">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       
-      <!-- Brand & Cloud Sync Status -->
+      <!-- Brand & Cloud Status -->
       <div class="flex items-center gap-3">
         <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
           <div class="bg-[#F25022]"></div>
@@ -78,19 +78,19 @@
         <div>
           <span class="font-semibold text-lg tracking-tight flex items-center gap-1.5">
             Microsoft <span class="text-ms-blue font-bold">Retain</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-ms-light text-ms-blue dark:bg-ms-dark/50">Core</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-ms-light text-ms-blue dark:bg-ms-dark/50">PCB</span>
           </span>
         </div>
         
         <!-- Realtime WebSocket Status Pill -->
         <button onclick="app.switchTab('settings')" id="cloud-status-pill" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 transition">
           <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span id="cloud-status-text" class="text-gray-600 dark:text-gray-300">Connecting...</span>
+          <span id="cloud-status-text" class="text-gray-600 dark:text-gray-300">Syncing...</span>
         </button>
       </div>
 
-      <!-- Center Quota Status Pills -->
-      <div class="hidden md:flex items-center gap-2 bg-gray-100 dark:bg-gray-800/60 p-1 rounded-full text-xs font-medium">
+      <!-- Quick Session Launcher Pills -->
+      <div class="hidden md:flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800/60 p-1 rounded-full text-xs font-medium">
         <button onclick="app.launchSlotReview('morning')" class="px-3 py-1 rounded-full flex items-center gap-1.5 transition hover:bg-white dark:hover:bg-gray-700 shadow-sm" id="slot-pill-morning">
           <span>☀️ Morning</span>
           <span class="bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-bold text-[10px]" id="badge-morning-quota">0/10</span>
@@ -103,20 +103,23 @@
           <span>🌙 Evening</span>
           <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-1.5 py-0.2 rounded-full font-bold text-[10px]" id="badge-evening-quota">0/20</span>
         </button>
+        <button onclick="app.launchStarredReview()" title="Practice only high-yield starred mistakes" class="px-2.5 py-1 rounded-full flex items-center gap-1 transition bg-amber-100/70 hover:bg-amber-200 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 font-bold text-[11px]">
+          <span>★</span> Drill (<span id="badge-starred-count">0</span>)
+        </button>
       </div>
 
       <!-- Right Controls -->
-      <div class="flex items-center gap-3">
-        <!-- Notification Status Button -->
-        <button onclick="app.switchTab('settings')" id="nav-notif-btn" class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-          <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-500" id="nav-notif-icon"></i>
-          <span id="nav-notif-label" class="hidden sm:inline">Alerts Pending</span>
-        </button>
+      <div class="flex items-center gap-2.5">
+        <!-- Mastery Counter -->
+        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+          <span id="stat-graduated-badge">0 Mastered</span>
+        </div>
 
         <!-- Streak Counter -->
         <div class="flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 rounded-md text-xs font-semibold border border-amber-200 dark:border-amber-800">
           <i data-lucide="flame" class="w-4 h-4 fill-amber-500 text-amber-500"></i>
-          <span id="stat-streak">3 Day Streak</span>
+          <span id="stat-streak">Active</span>
         </div>
 
         <!-- Dark Mode Toggle -->
@@ -135,7 +138,7 @@
         <i data-lucide="play-circle" class="w-4 h-4"></i> Practice Session
       </button>
       <button onclick="app.switchTab('ingest')" id="tab-ingest" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-2">
-        <i data-lucide="camera" class="w-4 h-4"></i> Add Mistake (Dual-Shot)
+        <i data-lucide="camera" class="w-4 h-4"></i> Add Mistake (15s)
       </button>
       <button onclick="app.switchTab('bank')" id="tab-bank" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-2">
         <i data-lucide="layers" class="w-4 h-4"></i> Mistake Ledger (<span id="tab-bank-count">0</span>)
@@ -162,31 +165,36 @@
               <i data-lucide="shuffle" class="w-5 h-5"></i>
             </div>
             <div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span id="review-qid-badge" class="font-mono text-xs font-bold text-ms-blue bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900">#PHY-001</span>
-                <span id="review-subject-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800">Physics</span>
-                <span id="review-chapter-badge" class="text-xs text-gray-500 dark:text-gray-400 font-medium">Rotational Dynamics</span>
+                <span id="review-subject-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">Physics</span>
+                <span id="review-chapter-badge" class="text-xs text-gray-600 dark:text-gray-300 font-medium">Rotational Dynamics</span>
                 <span id="review-difficulty-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
+                <span id="review-errortag-badge" class="hidden px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Calc Slip</span>
               </div>
               <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-3">
                 <span>Card <strong id="review-current-index" class="text-gray-800 dark:text-gray-200">1</strong> of <strong id="review-total-count">10</strong></span>
-                <span>• Lifetime History: <span id="review-history-dots" class="font-mono">❌ ❌ ⚠️</span></span>
-                <span>• Solve Accuracy: <strong id="review-card-accuracy" class="text-amber-600">33%</strong></span>
+                <span>• Mastery Streak: <span id="review-streak-dots" class="font-bold text-emerald-600">0/3 ✅</span></span>
+                <span>• Accuracy: <strong id="review-card-accuracy" class="text-amber-600">33%</strong></span>
               </div>
             </div>
           </div>
 
-          <!-- Dynamic Countdown Timer Engine & Delete Action -->
-          <div class="flex items-center gap-3">
+          <!-- Dynamic Timer & Star / Delete Controls -->
+          <div class="flex items-center gap-2.5">
             <div class="text-right">
               <div class="text-[10px] uppercase font-bold text-gray-400" id="timer-status-label">Time Remaining</div>
-              <div class="font-mono text-2xl font-bold tracking-tight text-ms-blue" id="timer-display">03:00</div>
+              <div class="font-mono text-2xl font-bold tracking-tight text-ms-blue" id="timer-display">02:00</div>
             </div>
-            <div class="w-10 h-10 rounded-full border-2 border-ms-blue flex items-center justify-center text-ms-blue" id="timer-indicator-circle">
+            <div class="w-10 h-10 rounded-full border-2 border-ms-blue flex items-center justify-center text-ms-blue mr-2" id="timer-indicator-circle">
               <i data-lucide="clock" class="w-5 h-5"></i>
             </div>
-            <!-- Quick-Delete current card from review -->
-            <button onclick="app.deleteCurrentQuestion()" title="Permanently delete this question" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition ml-1">
+            <!-- Quick Star Button -->
+            <button onclick="app.toggleCurrentStar()" id="review-star-btn" title="Toggle High-Yield Star" class="p-2 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition">
+              <i data-lucide="star" class="w-5 h-5"></i>
+            </button>
+            <!-- Quick Delete Button -->
+            <button onclick="app.deleteCurrentQuestion()" title="Permanently delete this question" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -195,18 +203,17 @@
         <!-- Question & Solution Viewport Card -->
         <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 overflow-hidden">
           
-          <!-- Timer Progress Bar -->
           <div class="w-full bg-gray-100 dark:bg-gray-800 h-1.5 overflow-hidden">
             <div id="timer-progress-fill" class="h-full bg-ms-blue transition-all duration-300" style="width: 100%;"></div>
           </div>
 
           <div class="p-6 sm:p-8 space-y-6">
             
-            <!-- STAGE 1: SHOT A (Question Image Canvas) -->
+            <!-- STAGE 1: SHOT A (Question Image) -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                  <i data-lucide="image" class="w-3.5 h-3.5"></i> Shot A: Question Snapshot
+                  <i data-lucide="image" class="w-3.5 h-3.5"></i> Shot A: Question Statement
                 </span>
                 <button onclick="app.zoomImage('question')" class="text-xs text-ms-blue hover:underline flex items-center gap-1">
                   <i data-lucide="maximize-2" class="w-3 h-3"></i> Full Resolution
@@ -218,29 +225,14 @@
               </div>
             </div>
 
-            <!-- Socratic Hint Box -->
-            <div id="hint-container" class="hidden p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-sm">
-              <div class="flex items-start gap-3">
-                <i data-lucide="sparkles" class="w-5 h-5 text-ms-blue mt-0.5 shrink-0"></i>
-                <div>
-                  <strong class="text-blue-900 dark:text-blue-300 font-semibold block mb-0.5">Socratic Conceptual Clue</strong>
-                  <p id="hint-text" class="text-blue-800 dark:text-blue-200 text-xs sm:text-sm leading-relaxed"></p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ACTION BAR 1: ACTIVE SOLVING BUTTONS -->
+            <!-- ACTION BAR 1: SOLVING CONTROLS -->
             <div id="action-bar-solving" class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
               <div class="flex items-center gap-2">
-                <button onclick="app.requestHint()" class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium flex items-center gap-1.5 transition">
-                  <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i> Hint
-                </button>
                 <button onclick="app.giveUpCurrentQuestion()" class="px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-medium flex items-center gap-1.5 transition">
                   <i data-lucide="flag" class="w-4 h-4"></i> Give Up (Stuck)
                 </button>
               </div>
 
-              <!-- PRIMARY TRIGGER: SHOW ANSWER -->
               <button onclick="app.triggerShowAnswer()" class="px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center gap-2 shadow-sm transition transform active:scale-95">
                 <i data-lucide="eye" class="w-4 h-4"></i>
                 <span>Show Answer & Verify</span>
@@ -250,7 +242,6 @@
             <!-- STAGE 2: VERIFICATION & SELF-GRADING BAR -->
             <div id="verification-panel" class="hidden space-y-6 pt-6 border-t-2 border-dashed border-gray-200 dark:border-gray-800">
               
-              <!-- Quick Key & Solve Latency Banner -->
               <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                   <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
@@ -258,20 +249,20 @@
                   </div>
                   <div>
                     <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Final Answer Key</div>
-                    <div id="review-quick-key" class="text-base font-bold text-gray-900 dark:text-white">Option B / 12 rad/s²</div>
+                    <div id="review-quick-key" class="text-base font-bold text-gray-900 dark:text-white">Option B</div>
                   </div>
                 </div>
                 <div class="text-right">
-                  <span class="text-xs text-gray-400 block">Solve Time Recorded</span>
-                  <span id="review-elapsed-recorded" class="text-sm font-mono font-bold text-ms-blue">02:14</span>
+                  <span class="text-xs text-gray-400 block">Solve Latency</span>
+                  <span id="review-elapsed-recorded" class="text-sm font-mono font-bold text-ms-blue">01:14</span>
                 </div>
               </div>
 
-              <!-- SHOT B: Solution Image Canvas -->
+              <!-- SHOT B: Full Solution Derivation -->
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                    <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i> Shot B: Full Step-by-Step Derivation
+                    <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i> Shot B: Step-by-Step Derivation
                   </span>
                   <button onclick="app.zoomImage('solution')" class="text-xs text-ms-blue hover:underline flex items-center gap-1">
                     <i data-lucide="maximize-2" class="w-3 h-3"></i> Full Resolution
@@ -283,11 +274,11 @@
                 </div>
               </div>
 
-              <!-- Self-Grading Decision Controls -->
+              <!-- Self-Grading Buttons -->
               <div class="p-5 rounded-2xl bg-blue-50/50 dark:bg-gray-800/50 border border-blue-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h4 class="font-bold text-sm text-gray-900 dark:text-white">Compare your rough work with the key</h4>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Did your independent derivation match the answer?</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Log 3 consecutive correct marks to auto-graduate this card!</p>
                 </div>
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                   <button onclick="app.selfGradeOutcome(false)" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-semibold flex items-center justify-center gap-2 transition shadow-sm">
@@ -312,12 +303,12 @@
           <i data-lucide="award" class="w-8 h-8"></i>
         </div>
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Batch Completed!</h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">You have reviewed all <span id="complete-total-count" class="font-semibold text-gray-800 dark:text-gray-200">10</span> questions scheduled for this session.</p>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Session Finished!</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">All <span id="complete-total-count" class="font-semibold text-gray-800 dark:text-gray-200">10</span> questions reviewed in this slot.</p>
         </div>
         <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-100 dark:border-gray-800">
           <div>
-            <span class="text-xs text-gray-400 uppercase font-semibold">Correct Answers</span>
+            <span class="text-xs text-gray-400 uppercase font-semibold">Correct Today</span>
             <div id="complete-correct-count" class="text-xl font-bold text-emerald-600 mt-0.5">0 / 0</div>
           </div>
           <div>
@@ -327,106 +318,137 @@
         </div>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button onclick="app.launchSlotReview(app.currentSlot)" class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-semibold transition">
-            Practice Again
+            Review More Questions
           </button>
           <button onclick="app.switchTab('bank')" class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold transition">
-            View Mistake Ledger
+            Open Mistake Ledger
           </button>
         </div>
       </div>
 
     </section>
 
-    <!-- VIEW 2: DUAL-SHOT INGESTION STUDIO -->
-    <section id="view-ingest" class="hidden max-w-4xl mx-auto space-y-6">
+    <!-- VIEW 2: FAST DUAL-SHOT INGESTION (15-SECOND CAPTURE) -->
+    <section id="view-ingest" class="hidden max-w-3xl mx-auto space-y-6">
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800">
         
-        <div class="flex items-center gap-3 pb-6 border-b border-gray-100 dark:border-gray-800">
-          <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
-            <i data-lucide="image-plus" class="w-6 h-6"></i>
+        <div class="flex items-center justify-between pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
+              <i data-lucide="camera" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">Log New Mistake</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Tap subject, drop screenshots, and save. Takes 15 seconds.</p>
+            </div>
           </div>
-          <div>
-            <h2 class="text-xl font-bold">Dual-Shot Mistake Capture</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Upload paper tests and hand-written solutions. Automatically generates unique Question ID.</p>
-          </div>
+          <span class="text-[11px] font-mono text-gray-400">Auto-ID Assignment</span>
         </div>
 
-        <form id="ingest-form" onsubmit="app.saveNewQuestion(event)" class="mt-6 space-y-6">
+        <form id="ingest-form" onsubmit="app.saveNewQuestion(event)" class="mt-6 space-y-5">
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Subject</label>
-              <input type="text" id="ingest-subject" required placeholder="e.g., Physics" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Chapter / Unit</label>
-              <input type="text" id="ingest-chapter" required placeholder="e.g., Electrostatics" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Difficulty</label>
-              <select id="ingest-difficulty" onchange="app.updateDefaultTimerByDifficulty()" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-                <option value="Easy">Easy (90s)</option>
-                <option value="Medium" selected>Medium (180s)</option>
-                <option value="Hard">Hard (300s)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Custom Timer (Sec)</label>
-              <input type="number" id="ingest-timer" value="180" min="20" max="1200" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-            </div>
-          </div>
-
+          <!-- 1-TAP SUBJECT SELECTOR (Auto-tunes NEET Pacing Timers) -->
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">
-              🔑 Quick Answer Key (Optional - for rapid verification)
-            </label>
-            <input type="text" id="ingest-quick-key" placeholder="e.g., Option (C) or 4.5 x 10^-3 N or x = 3/2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-            <span class="text-[11px] text-gray-400">Revealed immediately upon clicking "Show Answer" so you can confirm without reading the full derivation.</span>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Select Subject *</label>
+            <input type="hidden" id="ingest-subject" value="Physics">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="subject-selector-group">
+              <button type="button" onclick="app.selectSubject('Physics')" id="btn-sub-Physics" 
+                class="sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-blue-500 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-xs transition shadow-sm">
+                <span>⚛️</span> Physics (120s)
+              </button>
+              <button type="button" onclick="app.selectSubject('Chemistry')" id="btn-sub-Chemistry" 
+                class="sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs hover:border-amber-400 transition">
+                <span>🧪</span> Chemistry (60s)
+              </button>
+              <button type="button" onclick="app.selectSubject('Botany')" id="btn-sub-Botany" 
+                class="sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs hover:border-emerald-400 transition">
+                <span>🌿</span> Botany (45s)
+              </button>
+              <button type="button" onclick="app.selectSubject('Zoology')" id="btn-sub-Zoology" 
+                class="sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs hover:border-rose-400 transition">
+                <span>🧬</span> Zoology (45s)
+              </button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            <!-- Dropzone Shot A -->
-            <div class="space-y-2">
+          <!-- Chapter Name & Quick Key -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Chapter / Topic *</label>
+              <input type="text" id="ingest-chapter" required placeholder="e.g., Plant Kingdom / Electrostatics" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Quick Answer Key (Optional)</label>
+              <input type="text" id="ingest-quick-key" placeholder="e.g., Option (C) or 3.2 m/s²" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+          </div>
+
+          <!-- 1-TAP ROOT CAUSE ERROR CHIPS -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Why Did You Miss It? (Optional 1-Tap Tag)</label>
+            <input type="hidden" id="ingest-error-tag" value="">
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="app.selectErrorTag('Calculation Slip')" class="err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition">
+                🔢 Calculation Slip
+              </button>
+              <button type="button" onclick="app.selectErrorTag('NCERT Line')" class="err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition">
+                📖 NCERT Line Overlooked
+              </button>
+              <button type="button" onclick="app.selectErrorTag('Concept Blank')" class="err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition">
+                🧠 Formula / Concept Blank
+              </button>
+              <button type="button" onclick="app.selectErrorTag('Question Trap')" class="err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition">
+                ⚠️ Misread / Trap Option
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden Timer Field -->
+          <input type="hidden" id="ingest-timer" value="120">
+
+          <!-- FAST DUAL-SHOT DROPZONES -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <!-- Shot A -->
+            <div class="space-y-1.5">
               <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
-                <span>Shot A: The Question *</span>
+                <span>Shot A: Question *</span>
                 <span class="text-[10px] text-gray-400 font-normal">Supports Ctrl+V Paste</span>
               </span>
-              <div id="drop-shot-a" onclick="document.getElementById('file-shot-a').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[220px] bg-gray-50 dark:bg-black/20">
+              <div id="drop-shot-a" onclick="document.getElementById('file-shot-a').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[190px] bg-gray-50 dark:bg-black/20">
                 <input type="file" id="file-shot-a" accept="image/*" class="hidden" onchange="app.handleFileSelect(event, 'a')">
                 <div id="preview-box-a" class="hidden w-full h-full">
-                  <img id="img-preview-a" class="max-h-40 mx-auto object-contain rounded">
-                  <span class="text-[11px] text-ms-blue block mt-2">Click to replace photo</span>
+                  <img id="img-preview-a" class="max-h-36 mx-auto object-contain rounded">
+                  <span class="text-[10px] text-ms-blue block mt-1">Tap to change</span>
                 </div>
-                <div id="placeholder-box-a" class="space-y-2 text-gray-500">
-                  <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400"></i>
-                  <div class="text-xs font-medium">Click, drag & drop, or paste screenshot of <strong class="text-gray-700 dark:text-gray-300">Question</strong></div>
+                <div id="placeholder-box-a" class="space-y-1.5 text-gray-500">
+                  <i data-lucide="upload-cloud" class="w-7 h-7 mx-auto text-gray-400"></i>
+                  <div class="text-xs font-medium">Paste / Upload <strong class="text-gray-700 dark:text-gray-300">Question</strong></div>
                 </div>
               </div>
             </div>
 
-            <!-- Dropzone Shot B -->
-            <div class="space-y-2">
+            <!-- Shot B -->
+            <div class="space-y-1.5">
               <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
-                <span>Shot B: The Solution / Derivation *</span>
-                <span class="text-[10px] text-gray-400 font-normal">Collapsed during solve</span>
+                <span>Shot B: Solution Derivation *</span>
+                <span class="text-[10px] text-gray-400 font-normal">Hidden during solve</span>
               </span>
-              <div id="drop-shot-b" onclick="document.getElementById('file-shot-b').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[220px] bg-gray-50 dark:bg-black/20">
+              <div id="drop-shot-b" onclick="document.getElementById('file-shot-b').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[190px] bg-gray-50 dark:bg-black/20">
                 <input type="file" id="file-shot-b" accept="image/*" class="hidden" onchange="app.handleFileSelect(event, 'b')">
                 <div id="preview-box-b" class="hidden w-full h-full">
-                  <img id="img-preview-b" class="max-h-40 mx-auto object-contain rounded">
-                  <span class="text-[11px] text-ms-blue block mt-2">Click to replace photo</span>
+                  <img id="img-preview-b" class="max-h-36 mx-auto object-contain rounded">
+                  <span class="text-[10px] text-ms-blue block mt-1">Tap to change</span>
                 </div>
-                <div id="placeholder-box-b" class="space-y-2 text-gray-500">
-                  <i data-lucide="file-check" class="w-8 h-8 mx-auto text-gray-400"></i>
-                  <div class="text-xs font-medium">Click, drag & drop, or paste snapshot of <strong class="text-gray-700 dark:text-gray-300">Solution Key</strong></div>
+                <div id="placeholder-box-b" class="space-y-1.5 text-gray-500">
+                  <i data-lucide="file-check" class="w-7 h-7 mx-auto text-gray-400"></i>
+                  <div class="text-xs font-medium">Paste / Upload <strong class="text-gray-700 dark:text-gray-300">Solution</strong></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <button type="button" onclick="app.switchTab('review')" class="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
-            <button type="submit" class="px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center gap-2">
+          <div class="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Save Mistake & Sync
             </button>
           </div>
@@ -436,23 +458,30 @@
       </div>
     </section>
 
-    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK WITH PREVIEWS -->
+    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK -->
     <section id="view-bank" class="hidden space-y-6">
       
+      <!-- Filters and Fast Subject Quick-Chips -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search by ID, chapter, or subject..." class="px-3.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-72">
-          <select id="bank-filter-diff" onchange="app.renderBankTable()" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
-            <option value="ALL">All Difficulties</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
+        
+        <div class="flex items-center gap-2 flex-wrap">
+          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search ID, topic..." class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-48 sm:w-56">
+          
+          <!-- Subject & Status Chips -->
+          <div class="flex items-center gap-1 overflow-x-auto py-0.5 text-xs font-semibold">
+            <button onclick="app.setBankFilter('ALL')" id="filter-chip-ALL" class="px-2.5 py-1 rounded-full bg-ms-blue text-white transition">All</button>
+            <button onclick="app.setBankFilter('Physics')" id="filter-chip-Physics" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 transition">⚛️ Physics</button>
+            <button onclick="app.setBankFilter('Chemistry')" id="filter-chip-Chemistry" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-amber-50 transition">🧪 Chem</button>
+            <button onclick="app.setBankFilter('Botany')" id="filter-chip-Botany" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-emerald-50 transition">🌿 Botany</button>
+            <button onclick="app.setBankFilter('Zoology')" id="filter-chip-Zoology" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-rose-50 transition">🧬 Zoology</button>
+            <button onclick="app.setBankFilter('STARRED')" id="filter-chip-STARRED" class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition">★ Starred</button>
+            <button onclick="app.setBankFilter('GRADUATED')" id="filter-chip-GRADUATED" class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition">🎓 Mastered</button>
+          </div>
         </div>
 
         <div class="flex items-center gap-4 text-xs font-medium text-gray-500">
-          <span>Total Questions: <strong id="stat-total-q" class="text-gray-900 dark:text-white">0</strong></span>
-          <span>Mastery Rate: <strong id="stat-avg-accuracy" class="text-emerald-600 font-bold">0%</strong></span>
+          <span>Active Questions: <strong id="stat-active-q" class="text-gray-900 dark:text-white">0</strong></span>
+          <span>Mastery: <strong id="stat-avg-accuracy" class="text-emerald-600 font-bold">0%</strong></span>
         </div>
       </div>
 
@@ -476,7 +505,7 @@
             </div>
             <div>
               <h2 class="text-xl font-bold">Supabase Realtime Cloud Sync</h2>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured to your private cloud database. Syncs questions across Laptop and iPad in real time.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured database. Instant WebSocket replication across your iPad and laptop.</p>
             </div>
           </div>
           <span id="sb-status-badge" class="px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
@@ -511,184 +540,96 @@
 
       </div>
 
-      <!-- Push Alerts Settings -->
+      <!-- Review Slot Config -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
-        
-        <div class="flex items-center gap-3 pb-6 border-b border-gray-100 dark:border-gray-800">
-          <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600">
-            <i data-lucide="bell" class="w-6 h-6"></i>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Quota Management</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+            <span class="font-bold text-sm">☀️ Morning Slot</span>
+            <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
           </div>
-          <div>
-            <h2 class="text-xl font-bold">Cross-Surface Push Delivery</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Pushes review alerts to Windows Action Center, macOS notifications, and iPad Lock Screen.</p>
+          <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+            <span class="font-bold text-sm">🌤️ Midday Slot</span>
+            <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
           </div>
-        </div>
-
-        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <div class="text-sm font-bold flex items-center gap-2">
-              <span id="perm-status-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-              <span id="perm-status-text">System Alerts: Permission Needed</span>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Click below to authorize OS-level push notifications on this device.</p>
-          </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button onclick="app.requestNotificationPermission()" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="shield-check" class="w-4 h-4"></i> Enable Alerts
-            </button>
-            <button onclick="app.testNotificationFire()" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="send" class="w-4 h-4"></i> Test Alert
-            </button>
+          <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+            <span class="font-bold text-sm">🌙 Evening Slot</span>
+            <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
           </div>
         </div>
-
-        <!-- 3 Daily Scheduled Review Slots -->
-        <div class="space-y-4">
-          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Quota Management</h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-sm flex items-center gap-1.5">☀️ Morning Slot</span>
-                <span class="text-[10px] text-blue-600 font-bold bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded">Active</span>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
-                <input type="time" id="cfg-time-morning" value="08:00" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
-                <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-            </div>
-
-            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-sm flex items-center gap-1.5">🌤️ Midday Slot</span>
-                <span class="text-[10px] text-amber-600 font-bold bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">Active</span>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
-                <input type="time" id="cfg-time-midday" value="14:00" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
-                <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-            </div>
-
-            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-sm flex items-center gap-1.5">🌙 Evening Slot</span>
-                <span class="text-[10px] text-purple-600 font-bold bg-purple-50 dark:bg-purple-950 px-1.5 py-0.5 rounded">Active</span>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
-                <input type="time" id="cfg-time-evening" value="20:30" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
-                <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Manual Backup Fallback -->
-        <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h4 class="text-sm font-bold">Manual Backup File</h4>
-            <p class="text-xs text-gray-500">Export your mistake library as JSON for offline backup.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="app.exportDataJSON()" class="px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1.5">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON
-            </button>
-            <label class="px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1.5 cursor-pointer">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import JSON
-              <input type="file" id="import-json-file" accept=".json" class="hidden" onchange="app.importDataJSON(event)">
-            </label>
-          </div>
-        </div>
-
       </div>
 
     </section>
 
   </main>
 
-  <!-- ================= DEDICATED QUESTION DETAIL & INSPECT MODAL ================= -->
+  <!-- ================= DEDICATED INSPECT MODAL ================= -->
   <div id="modal-preview" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar border border-gray-200 dark:border-gray-700 shadow-2xl p-6 sm:p-8 space-y-6">
       
-      <!-- Modal Header -->
       <div class="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
         <div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <span id="prev-modal-qid" class="font-mono text-sm font-bold text-ms-blue bg-blue-50 dark:bg-blue-950 px-2.5 py-1 rounded border border-blue-200 dark:border-blue-900">#PHY-001</span>
             <span id="prev-modal-subject" class="text-xs font-bold uppercase text-gray-500">Physics</span>
-            <span id="prev-modal-diff" class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
+            <span id="prev-modal-grad-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">🎓 Mastered</span>
+            <span id="prev-modal-star-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800">★ High-Yield</span>
           </div>
-          <h3 id="prev-modal-chapter" class="text-lg font-bold text-gray-900 dark:text-white mt-1">Rotational Dynamics</h3>
+          <h3 id="prev-modal-chapter" class="text-lg font-bold text-gray-900 dark:text-white mt-1">Topic Name</h3>
         </div>
         <button onclick="app.closePreviewModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Quick Metrics Bar -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs">
         <div>
           <span class="text-gray-400 block">Total Attempts</span>
-          <strong id="prev-modal-attempts" class="text-sm font-bold">3</strong>
+          <strong id="prev-modal-attempts" class="text-sm font-bold">0</strong>
         </div>
         <div>
           <span class="text-gray-400 block">Accuracy</span>
-          <strong id="prev-modal-accuracy" class="text-sm font-bold text-emerald-600">33%</strong>
+          <strong id="prev-modal-accuracy" class="text-sm font-bold text-emerald-600">0%</strong>
         </div>
         <div>
-          <span class="text-gray-400 block">Quick Answer Key</span>
-          <strong id="prev-modal-key" class="text-sm font-bold text-gray-900 dark:text-white truncate block">Option B</strong>
+          <span class="text-gray-400 block">Quick Key</span>
+          <strong id="prev-modal-key" class="text-sm font-bold text-gray-900 dark:text-white truncate block">None</strong>
         </div>
         <div>
-          <span class="text-gray-400 block">Recent History</span>
-          <span id="prev-modal-history" class="text-sm font-mono font-bold">❌ ❌ ✅</span>
+          <span class="text-gray-400 block">Root Cause</span>
+          <strong id="prev-modal-errortag" class="text-sm font-bold text-ms-blue block">Not Tagged</strong>
         </div>
       </div>
 
-      <!-- Problem & Solution Tabs in Preview -->
       <div class="space-y-4">
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot A: Question Problem Statement</span>
-          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[220px]">
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot A: Question Statement</span>
+          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[200px]">
             <img id="prev-modal-shot-a" src="" class="max-h-[380px] w-auto object-contain rounded">
           </div>
         </div>
 
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot B: Complete Solution & Derivation</span>
-          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[220px]">
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot B: Solution Derivation</span>
+          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[200px]">
             <img id="prev-modal-shot-b" src="" class="max-h-[380px] w-auto object-contain rounded">
           </div>
         </div>
       </div>
 
-      <!-- Action footer -->
       <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
         <button id="prev-modal-del-btn" class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 text-xs font-semibold flex items-center gap-1.5 transition">
           <i data-lucide="trash-2" class="w-4 h-4"></i> Delete Question
         </button>
         <button id="prev-modal-practice-btn" class="px-5 py-2 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-xs font-semibold flex items-center gap-1.5 transition">
-          <i data-lucide="play" class="w-4 h-4"></i> Practice This Question Now
+          <i data-lucide="play" class="w-4 h-4"></i> Practice Now
         </button>
       </div>
 
     </div>
   </div>
 
-  <!-- ================= IMAGE EXPAND MODAL ================= -->
+  <!-- ================= IMAGE ZOOM MODAL ================= -->
   <div id="modal-zoom" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
     <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
       <button onclick="app.closeZoomModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 p-2 text-sm font-bold flex items-center gap-1">
@@ -698,7 +639,7 @@
     </div>
   </div>
 
-  <!-- ================= FLUENT TOAST NOTIFICATION ================= -->
+  <!-- ================= FLUENT TOAST ================= -->
   <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
     <div class="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-gray-700 text-sm">
       <i data-lucide="info" class="w-4 h-4 text-ms-blue" id="toast-icon"></i>
@@ -708,31 +649,11 @@
 
   <!-- ================= APPLICATION SCRIPT ================= -->
   <script>
-    // PRE-CONFIGURED SUPABASE CREDENTIALS
     const DEFAULT_SB_URL = 'https://nphsajjviogkllkunnvf.supabase.co';
     const DEFAULT_SB_KEY = 'sb_publishable_lEW0PHBY-ixtUryfB2lkaw_6nm2AKB_';
 
-    const sampleQuestionA = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="280" viewBox="0 0 600 280"><rect width="100%" height="100%" fill="%23FFFFFF"/><text x="30" y="45" font-family="sans-serif" font-size="18" font-weight="bold" fill="%230078D4">Rotational Dynamics: Rolling Without Slipping</text><text x="30" y="80" font-family="sans-serif" font-size="14" fill="%23242424">A uniform cylinder of mass M = 4 kg and radius R = 0.5 m rolls without</text><text x="30" y="105" font-family="sans-serif" font-size="14" fill="%23242424">slipping down an incline of angle θ = 30°. What is the linear acceleration</text><text x="30" y="130" font-family="sans-serif" font-size="14" fill="%23242424">of its center of mass? (Take g = 9.8 m/s²)</text><line x1="30" y1="240" x2="350" y2="240" stroke="%23333" stroke-width="3"/><line x1="30" y1="240" x2="300" y2="170" stroke="%23333" stroke-width="4"/><circle cx="180" cy="175" r="30" fill="%23EFF6FC" stroke="%230078D4" stroke-width="3"/><circle cx="180" cy="175" r="3" fill="%23D83B01"/><path d="M 120 240 A 60 60 0 0 0 100 220" fill="none" stroke="%23D83B01" stroke-width="2"/><text x="130" y="235" font-family="sans-serif" font-size="12" fill="%23D83B01">θ = 30°</text></svg>';
-
-    const sampleSolutionA = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="320" viewBox="0 0 600 320"><rect width="100%" height="100%" fill="%23FFFFFF"/><text x="30" y="40" font-family="sans-serif" font-size="16" font-weight="bold" fill="%23107C41">Step-by-Step Derivation & Solution Key</text><text x="30" y="75" font-family="sans-serif" font-size="13" fill="%23333">1. Equation of motion along incline: M·g·sin(θ) - f = M·a</text><text x="30" y="105" font-family="sans-serif" font-size="13" fill="%23333">2. Torque about center of mass: τ = f·R = I·α = (1/2·M·R²)·(a / R)</text><text x="30" y="135" font-family="sans-serif" font-size="13" fill="%23333">3. Friction force: f = (1/2)·M·a</text><text x="30" y="165" font-family="sans-serif" font-size="13" fill="%23333">4. Substitute into (1): M·g·sin(θ) - (1/2)·M·a = M·a  ➔  a = (2/3)·g·sin(θ)</text><text x="30" y="200" font-family="sans-serif" font-size="13" fill="%23333">5. Numerical Evaluation: a = (2/3) × 9.8 × sin(30°) = (2/3) × 9.8 × 0.5</text><rect x="30" y="230" width="360" height="45" fill="%23DFF6DD" rx="6"/><text x="45" y="258" font-family="sans-serif" font-size="15" font-weight="bold" fill="%23107C41">FINAL KEY: a = 3.27 m/s² (Option B)</text></svg>';
-
     const app = {
-      questionBank: JSON.parse(localStorage.getItem('retain_bank_v2')) || [
-        {
-          id: 'q_rotational_1',
-          displayId: '#PHY-001',
-          subject: 'Physics',
-          chapter: 'Rotational Dynamics',
-          difficulty: 'Hard',
-          allocatedTime: 300,
-          quickKey: 'Option B / 3.27 m/s²',
-          shotA: sampleQuestionA,
-          shotB: sampleSolutionA,
-          attempts: { total: 3, correct: 1, incorrect: 2, gaveUp: 0 },
-          accuracy: 33,
-          history: ['❌', '❌', '✅']
-        }
-      ],
+      questionBank: JSON.parse(localStorage.getItem('retain_bank_v2')) || [],
       currentReviewQueue: [],
       currentCardIndex: 0,
       timerInterval: null,
@@ -740,6 +661,7 @@
       timeElapsed: 0,
       isOvertime: false,
       currentSlot: 'morning',
+      currentBankFilter: 'ALL',
       sbClient: null,
       sbRealtimeChannel: null,
       uploadedShotA: null,
@@ -749,14 +671,12 @@
         this.ensureDisplayIds();
         lucide.createIcons();
         this.updateBankCounters();
-        this.initNotificationEngine();
         this.initClipboardListener();
         this.loadScheduleConfig();
         this.initSupabase();
         this.launchSlotReview('morning');
       },
 
-      // Generate clean Question IDs (#PHY-001, #NLM-002) for all questions
       ensureDisplayIds() {
         let changed = false;
         this.questionBank.forEach((q, idx) => {
@@ -765,6 +685,8 @@
             q.displayId = `#${prefix}-${String(idx + 1).padStart(3, '0')}`;
             changed = true;
           }
+          if (q.is_starred === undefined) q.is_starred = false;
+          if (q.graduated === undefined) q.graduated = false;
         });
         if (changed) this.saveBankToStorage(false);
       },
@@ -796,7 +718,7 @@
         const url = document.getElementById('sb-url-input').value.trim();
         const key = document.getElementById('sb-key-input').value.trim();
         if (!url || !key) {
-          this.showToast('Please provide both Project URL and Anon Key.', 'alert-circle');
+          this.showToast('Please provide URL and Key', 'alert-circle');
           return;
         }
         localStorage.setItem('retain_sb_url', url);
@@ -843,9 +765,7 @@
             this.handleRealtimeRowChange(payload);
           })
           .subscribe(status => {
-            if (status === 'SUBSCRIBED') {
-              this.setCloudStatus('connected');
-            }
+            if (status === 'SUBSCRIBED') this.setCloudStatus('connected');
           });
       },
 
@@ -860,14 +780,17 @@
             displayId: newRow.display_id || `#${(newRow.subject || 'Q').slice(0,3).toUpperCase()}-${String(this.questionBank.length + 1).padStart(3, '0')}`,
             subject: newRow.subject,
             chapter: newRow.chapter,
-            difficulty: newRow.difficulty,
+            difficulty: newRow.difficulty || 'Medium',
             allocatedTime: newRow.allocated_time,
             quickKey: newRow.quick_key,
             shotA: newRow.shot_a,
             shotB: newRow.shot_b,
             attempts: newRow.attempts || { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
             accuracy: newRow.accuracy || 0,
-            history: newRow.history || []
+            history: newRow.history || [],
+            is_starred: newRow.is_starred || false,
+            graduated: newRow.graduated || false,
+            error_tag: newRow.error_tag || ''
           };
           if (idx !== -1) {
             this.questionBank[idx] = mapped;
@@ -877,7 +800,8 @@
         }
         this.saveBankToStorage(false);
         this.renderBankTable();
-        this.showToast('⚡ Instant Sync: Question updated from another device!');
+        this.updateBankCounters();
+        this.showToast('⚡ Updated from another device!');
       },
 
       async fetchCloudQuestions() {
@@ -895,14 +819,17 @@
             displayId: q.display_id || `#${(q.subject || 'Q').slice(0, 3).toUpperCase()}-${String(idx + 1).padStart(3, '0')}`,
             subject: q.subject,
             chapter: q.chapter,
-            difficulty: q.difficulty,
+            difficulty: q.difficulty || 'Medium',
             allocatedTime: q.allocated_time,
             quickKey: q.quick_key,
             shotA: q.shot_a,
             shotB: q.shot_b,
             attempts: q.attempts || { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
             accuracy: q.accuracy || 0,
-            history: q.history || []
+            history: q.history || [],
+            is_starred: q.is_starred || false,
+            graduated: q.graduated || false,
+            error_tag: q.error_tag || ''
           }));
           this.saveBankToStorage(false);
           this.renderBankTable();
@@ -927,6 +854,9 @@
           attempts: q.attempts,
           accuracy: q.accuracy,
           history: q.history,
+          is_starred: q.is_starred || false,
+          graduated: q.graduated || false,
+          error_tag: q.error_tag || '',
           updated_at: new Date().toISOString()
         });
       },
@@ -950,12 +880,15 @@
           attempts: q.attempts,
           accuracy: q.accuracy,
           history: q.history,
+          is_starred: q.is_starred || false,
+          graduated: q.graduated || false,
+          error_tag: q.error_tag || '',
           updated_at: new Date().toISOString()
         }));
 
         const { error } = await this.sbClient.from('retain_questions').upsert(rows);
         if (!error) {
-          this.showToast(`☁️ Pushed ${rows.length} questions to cloud!`);
+          this.showToast(`☁️ Pushed ${rows.length} questions to Supabase!`);
           this.setCloudStatus('connected');
         } else {
           this.showToast('Push failed: ' + error.message, 'alert-circle');
@@ -963,31 +896,94 @@
         }
       },
 
+      // 1-Tap Subject Selector with Automatic NEET Exam Pacing
+      selectSubject(subj) {
+        document.getElementById('ingest-subject').value = subj;
+        document.querySelectorAll('.sub-pill').forEach(btn => {
+          btn.className = 'sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs transition';
+        });
+
+        const activeBtn = document.getElementById(`btn-sub-${subj}`);
+        const colors = {
+          Physics: 'border-blue-500 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold',
+          Chemistry: 'border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold',
+          Botany: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold',
+          Zoology: 'border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold'
+        };
+        activeBtn.className = `sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border ${colors[subj]} text-xs transition shadow-sm`;
+
+        // Pacing: Bio recall (45s), Chem (60s), Physics scratch (120s)
+        const timerInput = document.getElementById('ingest-timer');
+        if (subj === 'Botany' || subj === 'Zoology') timerInput.value = 45;
+        else if (subj === 'Chemistry') timerInput.value = 60;
+        else if (subj === 'Physics') timerInput.value = 120;
+      },
+
+      selectErrorTag(tag) {
+        const input = document.getElementById('ingest-error-tag');
+        input.value = (input.value === tag) ? '' : tag;
+        document.querySelectorAll('.err-chip').forEach(btn => {
+          if (btn.textContent.includes(tag) && input.value === tag) {
+            btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-bold border border-ms-blue bg-blue-50 dark:bg-blue-950/60 text-ms-blue transition';
+          } else {
+            btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
+          }
+        });
+      },
+
+      // Star / High-Yield Trap Toggles
+      toggleStar(id) {
+        const q = this.questionBank.find(item => item.id === id);
+        if (!q) return;
+        q.is_starred = !q.is_starred;
+        this.saveBankToStorage(true, q);
+        this.renderBankTable();
+        this.updateBankCounters();
+        this.showToast(q.is_starred ? '★ Marked High-Yield Trap' : 'Star removed');
+      },
+
+      toggleCurrentStar() {
+        if (!this.currentReviewQueue || this.currentReviewQueue.length === 0) return;
+        const currentQ = this.currentReviewQueue[this.currentCardIndex];
+        if (currentQ) {
+          this.toggleStar(currentQ.id);
+          this.updateCurrentStarBtnUI(currentQ.is_starred);
+        }
+      },
+
+      updateCurrentStarBtnUI(isStarred) {
+        const starBtn = document.getElementById('review-star-btn');
+        if (isStarred) {
+          starBtn.className = 'p-2 text-amber-500 fill-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition';
+          starBtn.innerHTML = '<i data-lucide="star" class="w-5 h-5 fill-amber-500"></i>';
+        } else {
+          starBtn.className = 'p-2 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition';
+          starBtn.innerHTML = '<i data-lucide="star" class="w-5 h-5"></i>';
+        }
+        lucide.createIcons();
+      },
+
       // Delete question permanently
       async deleteQuestion(id) {
-        if (!confirm('Are you sure you want to permanently delete this question?')) return;
-        
+        if (!confirm('Permanently delete this mistake?')) return;
         this.questionBank = this.questionBank.filter(q => q.id !== id);
         this.saveBankToStorage(false);
 
         if (this.sbClient) {
-          const { error } = await this.sbClient.from('retain_questions').delete().eq('id', id);
-          if (error) console.error('Cloud delete error:', error);
+          await this.sbClient.from('retain_questions').delete().eq('id', id);
         }
 
         this.closePreviewModal();
         this.renderBankTable();
         this.updateBankCounters();
-        this.showToast('Question permanently deleted.');
+        this.showToast('Question deleted.');
 
         if (this.currentReviewQueue && this.currentReviewQueue.some(q => q.id === id)) {
           this.currentReviewQueue = this.currentReviewQueue.filter(q => q.id !== id);
           if (this.currentReviewQueue.length === 0) {
             this.launchSlotReview(this.currentSlot);
           } else {
-            if (this.currentCardIndex >= this.currentReviewQueue.length) {
-              this.currentCardIndex = 0;
-            }
+            if (this.currentCardIndex >= this.currentReviewQueue.length) this.currentCardIndex = 0;
             this.renderCurrentCard();
           }
         }
@@ -996,12 +992,504 @@
       deleteCurrentQuestion() {
         if (!this.currentReviewQueue || this.currentReviewQueue.length === 0) return;
         const currentQ = this.currentReviewQueue[this.currentCardIndex];
-        if (currentQ) {
-          this.deleteQuestion(currentQ.id);
+        if (currentQ) this.deleteQuestion(currentQ.id);
+      },
+
+      // Review Queue Launcher (Excludes Auto-Graduated Mastered Cards)
+      launchSlotReview(slot) {
+        this.currentSlot = slot;
+        const quotaMap = {
+          morning: parseInt(document.getElementById('cfg-quota-morning').value) || 10,
+          midday: parseInt(document.getElementById('cfg-quota-midday').value) || 10,
+          evening: parseInt(document.getElementById('cfg-quota-evening').value) || 20
+        };
+        const quota = quotaMap[slot] || 10;
+
+        // RULE OF 3: Filter out cards that have graduated
+        const activePool = this.questionBank.filter(q => !q.graduated);
+
+        if (activePool.length === 0) {
+          if (this.questionBank.length > 0) {
+            this.showToast('All mistakes graduated! Review Mastered in Ledger.');
+            this.setBankFilter('GRADUATED');
+            this.switchTab('bank');
+          } else {
+            this.showToast('No mistakes logged yet.', 'alert-circle');
+            this.switchTab('ingest');
+          }
+          return;
+        }
+
+        document.getElementById('review-active-panel').classList.remove('hidden');
+        document.getElementById('review-complete-panel').classList.add('hidden');
+
+        // Failure-Weighted Shuffle
+        const weightedPool = activePool.map(q => {
+          const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
+          const starBoost = q.is_starred ? 3 : 0;
+          return { item: q, weight: 1 + (failureCount * 2.5) + starBoost };
+        });
+
+        const shuffled = [];
+        const poolCopy = [...weightedPool];
+
+        while (shuffled.length < quota && poolCopy.length > 0) {
+          const totalWeight = poolCopy.reduce((sum, el) => sum + el.weight, 0);
+          let randomVal = Math.random() * totalWeight;
+          let chosenIndex = 0;
+
+          for (let i = 0; i < poolCopy.length; i++) {
+            randomVal -= poolCopy[i].weight;
+            if (randomVal <= 0) {
+              chosenIndex = i;
+              break;
+            }
+          }
+          shuffled.push(poolCopy[chosenIndex].item);
+          poolCopy.splice(chosenIndex, 1);
+        }
+
+        this.currentReviewQueue = shuffled;
+        this.currentCardIndex = 0;
+        this.switchTab('review');
+        this.renderCurrentCard();
+      },
+
+      launchStarredReview() {
+        const starred = this.questionBank.filter(q => q.is_starred);
+        if (starred.length === 0) {
+          this.showToast('No starred questions yet! Tap ★ on any question.');
+          return;
+        }
+        this.currentReviewQueue = [...starred];
+        this.currentCardIndex = 0;
+        document.getElementById('review-active-panel').classList.remove('hidden');
+        document.getElementById('review-complete-panel').classList.add('hidden');
+        this.switchTab('review');
+        this.renderCurrentCard();
+        this.showToast(`Loaded ${starred.length} High-Yield Starred Questions!`);
+      },
+
+      renderCurrentCard() {
+        if (this.currentReviewQueue.length === 0) return;
+        const q = this.currentReviewQueue[this.currentCardIndex];
+
+        document.getElementById('verification-panel').classList.add('hidden');
+        document.getElementById('action-bar-solving').classList.remove('hidden');
+
+        document.getElementById('review-qid-badge').textContent = q.displayId || `#${q.id.slice(-4)}`;
+        
+        // Subject Badge Styling
+        const subjBadge = document.getElementById('review-subject-badge');
+        subjBadge.textContent = q.subject;
+        const subColors = {
+          Physics: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+          Chemistry: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+          Botany: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+          Zoology: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+        };
+        subjBadge.className = `px-2 py-0.5 rounded text-xs font-bold ${subColors[q.subject] || 'bg-gray-100 text-gray-800'}`;
+
+        document.getElementById('review-chapter-badge').textContent = q.chapter;
+        document.getElementById('review-difficulty-badge').textContent = q.difficulty || 'Medium';
+
+        // Error tag badge
+        const errBadge = document.getElementById('review-errortag-badge');
+        if (q.error_tag) {
+          errBadge.textContent = q.error_tag;
+          errBadge.classList.remove('hidden');
+        } else {
+          errBadge.classList.add('hidden');
+        }
+
+        document.getElementById('review-current-index').textContent = this.currentCardIndex + 1;
+        document.getElementById('review-total-count').textContent = this.currentReviewQueue.length;
+        
+        // Calculate Streak towards Rule of 3 Graduation
+        const recentHistory = (q.history || []).slice(-3);
+        const streakCount = recentHistory.filter(h => h === '✅').length;
+        document.getElementById('review-streak-dots').textContent = `${streakCount}/3 ✅`;
+        document.getElementById('review-card-accuracy').textContent = `${q.accuracy || 0}%`;
+
+        document.getElementById('review-shot-a-img').src = q.shotA;
+        document.getElementById('review-shot-b-img').src = q.shotB;
+        document.getElementById('review-quick-key').textContent = q.quickKey || 'Full working in Shot B';
+
+        this.updateCurrentStarBtnUI(q.is_starred);
+        this.startCardTimer(q.allocatedTime || 120);
+        lucide.createIcons();
+      },
+
+      startCardTimer(seconds) {
+        clearInterval(this.timerInterval);
+        this.timeRemaining = seconds;
+        this.timeElapsed = 0;
+        this.isOvertime = false;
+
+        const display = document.getElementById('timer-display');
+        const fill = document.getElementById('timer-progress-fill');
+        const label = document.getElementById('timer-status-label');
+        label.textContent = 'Time Remaining';
+        label.className = 'text-[10px] uppercase font-bold text-gray-400';
+        display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
+        fill.className = 'h-full bg-ms-blue transition-all duration-300';
+
+        this.updateTimerUI(this.timeRemaining, seconds);
+
+        this.timerInterval = setInterval(() => {
+          this.timeElapsed++;
+          if (!this.isOvertime) {
+            this.timeRemaining--;
+            this.updateTimerUI(this.timeRemaining, seconds);
+
+            if (this.timeRemaining <= 0) {
+              this.isOvertime = true;
+              label.textContent = 'Overtime Recorded';
+              label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
+              display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
+              fill.className = 'h-full bg-red-500';
+            }
+          } else {
+            const overSeconds = this.timeElapsed - seconds;
+            display.textContent = `+${this.formatTime(overSeconds)}`;
+          }
+        }, 1000);
+      },
+
+      updateTimerUI(rem, total) {
+        const display = document.getElementById('timer-display');
+        const fill = document.getElementById('timer-progress-fill');
+        display.textContent = this.formatTime(rem);
+        const pct = Math.max(0, (rem / total) * 100);
+        fill.style.width = `${pct}%`;
+
+        if (rem <= 15 && rem > 0) {
+          display.className = 'font-mono text-2xl font-bold tracking-tight text-amber-600 animate-pulse';
+          fill.className = 'h-full bg-amber-500 transition-all duration-300';
         }
       },
 
-      // Dedicated Question Inspector Modal
+      formatTime(s) {
+        const m = Math.floor(Math.abs(s) / 60);
+        const sec = Math.abs(s) % 60;
+        return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      },
+
+      triggerShowAnswer() {
+        clearInterval(this.timerInterval);
+        const solveTimeStr = this.formatTime(this.timeElapsed);
+        document.getElementById('review-elapsed-recorded').textContent = solveTimeStr + (this.isOvertime ? ' (Overtime)' : '');
+        document.getElementById('action-bar-solving').classList.add('hidden');
+        document.getElementById('verification-panel').classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      giveUpCurrentQuestion() {
+        clearInterval(this.timerInterval);
+        document.getElementById('action-bar-solving').classList.add('hidden');
+        document.getElementById('verification-panel').classList.remove('hidden');
+        this.selfGradeOutcome(false, true);
+      },
+
+      selfGradeOutcome(isRight, didGiveUp = false) {
+        const currentQ = this.currentReviewQueue[this.currentCardIndex];
+        const bankIndex = this.questionBank.findIndex(q => q.id === currentQ.id);
+
+        if (bankIndex !== -1) {
+          const q = this.questionBank[bankIndex];
+          q.attempts.total = (q.attempts.total || 0) + 1;
+          if (!q.history) q.history = [];
+
+          if (isRight) {
+            q.attempts.correct = (q.attempts.correct || 0) + 1;
+            q.history.push('✅');
+
+            // RULE OF 3 CHECK: Did it log 3 consecutive correct marks?
+            const lastThree = q.history.slice(-3);
+            if (lastThree.length === 3 && lastThree.every(h => h === '✅')) {
+              q.graduated = true;
+              this.showToast('🎓 Mastered! Graduated from daily queue.', 'award');
+            } else {
+              this.showToast(`Logged Correct! Streak: ${lastThree.filter(h => h === '✅').length}/3`, 'check');
+            }
+          } else {
+            // Relapse failsafe: drops graduation if failed
+            q.graduated = false;
+            if (didGiveUp) {
+              q.attempts.gaveUp = (q.attempts.gaveUp || 0) + 1;
+              q.history.push('🏳️');
+              this.showToast('Logged as Gave Up. Prioritized in queue.');
+            } else {
+              q.attempts.incorrect = (q.attempts.incorrect || 0) + 1;
+              q.history.push('❌');
+              this.showToast('Incorrect logged. Boosted in future shuffles.');
+            }
+          }
+
+          q.accuracy = Math.round((q.attempts.correct / q.attempts.total) * 100);
+          this.saveBankToStorage(true, q);
+        }
+
+        setTimeout(() => this.advanceToNextCard(), 1000);
+      },
+
+      advanceToNextCard() {
+        if (this.currentCardIndex + 1 < this.currentReviewQueue.length) {
+          this.currentCardIndex++;
+          this.renderCurrentCard();
+        } else {
+          clearInterval(this.timerInterval);
+          this.renderSessionComplete();
+        }
+      },
+
+      renderSessionComplete() {
+        clearInterval(this.timerInterval);
+        document.getElementById('review-active-panel').classList.add('hidden');
+        const completePanel = document.getElementById('review-complete-panel');
+        completePanel.classList.remove('hidden');
+
+        const totalCount = this.currentReviewQueue.length;
+        const correctCount = this.currentReviewQueue.filter(q => {
+          const item = this.questionBank.find(b => b.id === q.id);
+          return item && item.history && item.history[item.history.length - 1] === '✅';
+        }).length;
+        const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+        document.getElementById('complete-total-count').textContent = totalCount;
+        document.getElementById('complete-correct-count').textContent = `${correctCount} / ${totalCount}`;
+        document.getElementById('complete-accuracy').textContent = `${accuracy}%`;
+
+        const badgeElem = document.getElementById(`badge-${this.currentSlot}-quota`);
+        if (badgeElem) badgeElem.textContent = `${totalCount}/${totalCount} Done`;
+
+        lucide.createIcons();
+        this.showToast('🎉 Session Completed!');
+      },
+
+      handleFileSelect(e, shotType) {
+        const file = e.target.files[0];
+        if (!file) return;
+        this.readFileAsCompressedDataURL(file, dataUrl => {
+          if (shotType === 'a') {
+            this.uploadedShotA = dataUrl;
+            document.getElementById('placeholder-box-a').classList.add('hidden');
+            document.getElementById('preview-box-a').classList.remove('hidden');
+            document.getElementById('img-preview-a').src = dataUrl;
+          } else {
+            this.uploadedShotB = dataUrl;
+            document.getElementById('placeholder-box-b').classList.add('hidden');
+            document.getElementById('preview-box-b').classList.remove('hidden');
+            document.getElementById('img-preview-b').src = dataUrl;
+          }
+        });
+      },
+
+      initClipboardListener() {
+        window.addEventListener('paste', e => {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let item of items) {
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+              const blob = item.getAsFile();
+              this.readFileAsCompressedDataURL(blob, dataUrl => {
+                if (!this.uploadedShotA) {
+                  this.uploadedShotA = dataUrl;
+                  document.getElementById('placeholder-box-a').classList.add('hidden');
+                  document.getElementById('preview-box-a').classList.remove('hidden');
+                  document.getElementById('img-preview-a').src = dataUrl;
+                  this.showToast('Pasted into Shot A (Question)');
+                } else {
+                  this.uploadedShotB = dataUrl;
+                  document.getElementById('placeholder-box-b').classList.add('hidden');
+                  document.getElementById('preview-box-b').classList.remove('hidden');
+                  document.getElementById('img-preview-b').src = dataUrl;
+                  this.showToast('Pasted into Shot B (Solution)');
+                }
+              });
+            }
+          }
+        });
+      },
+
+      readFileAsCompressedDataURL(file, callback) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 1200;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+              else { w = (w / h) * maxDim; h = maxDim; }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      },
+
+      saveNewQuestion(e) {
+        e.preventDefault();
+        if (!this.uploadedShotA || !this.uploadedShotB) {
+          this.showToast('Please provide both Question and Solution snapshots!', 'alert-circle');
+          return;
+        }
+
+        const subj = document.getElementById('ingest-subject').value.trim();
+        const prefix = (subj || 'Q').slice(0, 3).toUpperCase();
+        const displayId = `#${prefix}-${String(this.questionBank.length + 1).padStart(3, '0')}`;
+
+        const newQ = {
+          id: 'q_' + Date.now(),
+          displayId: displayId,
+          subject: subj,
+          chapter: document.getElementById('ingest-chapter').value.trim(),
+          difficulty: 'Medium',
+          allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 60,
+          quickKey: document.getElementById('ingest-quick-key').value.trim() || 'See Solution Derivation',
+          error_tag: document.getElementById('ingest-error-tag').value.trim(),
+          is_starred: false,
+          graduated: false,
+          shotA: this.uploadedShotA,
+          shotB: this.uploadedShotB,
+          attempts: { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
+          accuracy: 0,
+          history: []
+        };
+
+        this.questionBank.unshift(newQ);
+        this.saveBankToStorage(true, newQ);
+        this.showToast(`Saved ${displayId} (${subj})!`);
+
+        document.getElementById('ingest-form').reset();
+        this.uploadedShotA = null;
+        this.uploadedShotB = null;
+        document.getElementById('placeholder-box-a').classList.remove('hidden');
+        document.getElementById('preview-box-a').classList.add('hidden');
+        document.getElementById('placeholder-box-b').classList.remove('hidden');
+        document.getElementById('preview-box-b').classList.add('hidden');
+        document.getElementById('ingest-error-tag').value = '';
+        document.querySelectorAll('.err-chip').forEach(btn => {
+          btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
+        });
+
+        this.switchTab('bank');
+      },
+
+      saveBankToStorage(pushToCloud = false, questionToSync = null) {
+        localStorage.setItem('retain_bank_v2', JSON.stringify(this.questionBank));
+        this.updateBankCounters();
+        if (pushToCloud && questionToSync) {
+          this.syncQuestionToCloud(questionToSync);
+        }
+      },
+
+      updateBankCounters() {
+        const activeCount = this.questionBank.filter(q => !q.graduated).length;
+        const gradCount = this.questionBank.filter(q => q.graduated).length;
+        const starCount = this.questionBank.filter(q => q.is_starred).length;
+
+        document.getElementById('tab-bank-count').textContent = this.questionBank.length;
+        document.getElementById('stat-active-q').textContent = activeCount;
+        document.getElementById('stat-graduated-badge').textContent = `${gradCount} Mastered`;
+        document.getElementById('badge-starred-count').textContent = starCount;
+
+        if (this.questionBank.length > 0) {
+          const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts.total || 0), 0);
+          const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts.correct || 0), 0);
+          const avg = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+          document.getElementById('stat-avg-accuracy').textContent = `${avg}%`;
+        }
+      },
+
+      setBankFilter(f) {
+        this.currentBankFilter = f;
+        document.querySelectorAll('[id^="filter-chip-"]').forEach(btn => {
+          btn.className = 'px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition text-xs font-semibold';
+        });
+        const active = document.getElementById(`filter-chip-${f}`);
+        if (active) active.className = 'px-2.5 py-1 rounded-full bg-ms-blue text-white transition text-xs font-semibold shadow-sm';
+        this.renderBankTable();
+      },
+
+      // Render Ledger Cards
+      renderBankTable() {
+        const grid = document.getElementById('bank-grid');
+        const search = document.getElementById('bank-search').value.toLowerCase();
+        const f = this.currentBankFilter;
+
+        const filtered = this.questionBank.filter(q => {
+          const qid = (q.displayId || '').toLowerCase();
+          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search) || qid.includes(search);
+          
+          let matchFilter = true;
+          if (f === 'STARRED') matchFilter = q.is_starred === true;
+          else if (f === 'GRADUATED') matchFilter = q.graduated === true;
+          else if (f !== 'ALL') matchFilter = q.subject === f;
+
+          return matchSearch && matchFilter;
+        });
+
+        if (filtered.length === 0) {
+          grid.innerHTML = '<div class="col-span-full py-12 text-center text-gray-400 text-sm">No mistakes match the filter.</div>';
+          return;
+        }
+
+        const subColors = {
+          Physics: 'text-blue-600 bg-blue-50 dark:bg-blue-950/60',
+          Chemistry: 'text-amber-600 bg-amber-50 dark:bg-amber-950/60',
+          Botany: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60',
+          Zoology: 'text-rose-600 bg-rose-50 dark:bg-rose-950/60'
+        };
+
+        grid.innerHTML = filtered.map(q => `
+          <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl border ${q.is_starred ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-gray-200 dark:border-gray-800'} shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
+            
+            <div onclick="app.openPreviewModal('${q.id}')" class="relative bg-gray-50 dark:bg-black/30 h-36 border-b border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer flex items-center justify-center">
+              <img src="${q.shotA}" class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-200" alt="Preview">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+                <i data-lucide="eye" class="w-4 h-4"></i> Inspect
+              </div>
+              <span class="absolute top-2 left-2 font-mono text-[10px] font-bold text-ms-blue bg-white/95 dark:bg-gray-900/95 px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-900">
+                ${q.displayId || '#Q'}
+              </span>
+              ${q.graduated ? '<span class="absolute top-2 right-2 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm">🎓 Mastered</span>' : ''}
+            </div>
+
+            <div class="p-3.5 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-[11px] px-2 py-0.5 rounded ${subColors[q.subject] || 'bg-gray-100'}">${q.subject}</span>
+                <span class="text-[10px] font-bold text-gray-400">${q.allocatedTime}s</span>
+              </div>
+              <h4 class="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">${q.chapter}</h4>
+              ${q.error_tag ? `<div class="text-[11px] text-gray-400 truncate">Tag: <span class="font-semibold text-ms-blue">\${q.error_tag}</span></div>` : ''}
+            </div>
+
+            <div class="px-3.5 py-2.5 bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+              <span class="font-mono text-gray-600 dark:text-gray-400 text-[11px]">${(q.history || []).slice(-3).join(' ') || 'Fresh'}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold mr-1 ${q.accuracy >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${q.accuracy}%</span>
+                <button onclick="app.toggleStar('${q.id}')" title="Toggle Star" class="p-1 rounded hover:bg-white dark:hover:bg-gray-700 transition ${q.is_starred ? 'text-amber-500 fill-amber-500' : 'text-gray-400'}">
+                  <i data-lucide="star" class="w-4 h-4 ${q.is_starred ? 'fill-amber-500' : ''}"></i>
+                </button>
+                <button onclick="app.deleteQuestion('${q.id}')" title="Delete" class="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-gray-700 transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `).join('');
+        lucide.createIcons();
+      },
+
       openPreviewModal(id) {
         const q = this.questionBank.find(item => item.id === id);
         if (!q) return;
@@ -1009,12 +1497,19 @@
         document.getElementById('prev-modal-qid').textContent = q.displayId || `#${q.id.slice(-4)}`;
         document.getElementById('prev-modal-subject').textContent = q.subject;
         document.getElementById('prev-modal-chapter').textContent = q.chapter;
-        document.getElementById('prev-modal-diff').textContent = q.difficulty;
         document.getElementById('prev-modal-attempts').textContent = q.attempts.total || 0;
         document.getElementById('prev-modal-accuracy').textContent = `${q.accuracy || 0}%`;
-        document.getElementById('prev-modal-key').textContent = q.quickKey || 'Full derivation in Shot B';
-        document.getElementById('prev-modal-history').textContent = (q.history && q.history.length > 0) ? q.history.slice(-4).join(' ') : 'None';
-        
+        document.getElementById('prev-modal-key').textContent = q.quickKey || 'None';
+        document.getElementById('prev-modal-errortag').textContent = q.error_tag || 'None';
+
+        const gradBadge = document.getElementById('prev-modal-grad-badge');
+        if (q.graduated) gradBadge.classList.remove('hidden');
+        else gradBadge.classList.add('hidden');
+
+        const starBadge = document.getElementById('prev-modal-star-badge');
+        if (q.is_starred) starBadge.classList.remove('hidden');
+        else starBadge.classList.add('hidden');
+
         document.getElementById('prev-modal-shot-a').src = q.shotA;
         document.getElementById('prev-modal-shot-b').src = q.shotB;
 
@@ -1061,503 +1556,10 @@
         setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
       },
 
-      launchSlotReview(slot) {
-        this.currentSlot = slot;
-        const quotaMap = {
-          morning: parseInt(document.getElementById('cfg-quota-morning').value) || 10,
-          midday: parseInt(document.getElementById('cfg-quota-midday').value) || 10,
-          evening: parseInt(document.getElementById('cfg-quota-evening').value) || 20
-        };
-        const quota = quotaMap[slot] || 10;
-
-        if (this.questionBank.length === 0) {
-          this.showToast('No mistakes logged yet.', 'alert-circle');
-          this.switchTab('ingest');
-          return;
-        }
-
-        document.getElementById('review-active-panel').classList.remove('hidden');
-        document.getElementById('review-complete-panel').classList.add('hidden');
-
-        const weightedPool = [...this.questionBank].map(q => {
-          const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
-          return { item: q, weight: 1 + failureCount * 2.5 };
-        });
-
-        const shuffled = [];
-        const poolCopy = [...weightedPool];
-
-        while (shuffled.length < quota && poolCopy.length > 0) {
-          const totalWeight = poolCopy.reduce((sum, el) => sum + el.weight, 0);
-          let randomVal = Math.random() * totalWeight;
-          let chosenIndex = 0;
-
-          for (let i = 0; i < poolCopy.length; i++) {
-            randomVal -= poolCopy[i].weight;
-            if (randomVal <= 0) {
-              chosenIndex = i;
-              break;
-            }
-          }
-          shuffled.push(poolCopy[chosenIndex].item);
-          poolCopy.splice(chosenIndex, 1);
-        }
-
-        this.currentReviewQueue = shuffled;
-        this.currentCardIndex = 0;
-        this.switchTab('review');
-        this.renderCurrentCard();
-      },
-
-      renderCurrentCard() {
-        if (this.currentReviewQueue.length === 0) return;
-        const q = this.currentReviewQueue[this.currentCardIndex];
-
-        document.getElementById('verification-panel').classList.add('hidden');
-        document.getElementById('hint-container').classList.add('hidden');
-        document.getElementById('action-bar-solving').classList.remove('hidden');
-
-        document.getElementById('review-qid-badge').textContent = q.displayId || `#${q.id.slice(-4)}`;
-        document.getElementById('review-subject-badge').textContent = q.subject;
-        document.getElementById('review-chapter-badge').textContent = q.chapter;
-        document.getElementById('review-difficulty-badge').textContent = q.difficulty;
-        document.getElementById('review-current-index').textContent = this.currentCardIndex + 1;
-        document.getElementById('review-total-count').textContent = this.currentReviewQueue.length;
-        document.getElementById('review-history-dots').textContent = (q.history && q.history.length > 0) ? q.history.slice(-4).join(' ') : 'Fresh';
-        document.getElementById('review-card-accuracy').textContent = `${q.accuracy || 0}%`;
-
-        document.getElementById('review-shot-a-img').src = q.shotA;
-        document.getElementById('review-shot-b-img').src = q.shotB;
-        document.getElementById('review-quick-key').textContent = q.quickKey || 'Full working displayed in Shot B';
-
-        this.startCardTimer(q.allocatedTime || 180);
-        lucide.createIcons();
-      },
-
-      startCardTimer(seconds) {
-        clearInterval(this.timerInterval);
-        this.timeRemaining = seconds;
-        this.timeElapsed = 0;
-        isOvertime = false;
-
-        const display = document.getElementById('timer-display');
-        const fill = document.getElementById('timer-progress-fill');
-        const label = document.getElementById('timer-status-label');
-        label.textContent = 'Time Remaining';
-        label.className = 'text-[10px] uppercase font-bold text-gray-400';
-        display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
-        fill.className = 'h-full bg-ms-blue transition-all duration-300';
-
-        this.updateTimerUI(this.timeRemaining, seconds);
-
-        this.timerInterval = setInterval(() => {
-          this.timeElapsed++;
-          if (!this.isOvertime) {
-            this.timeRemaining--;
-            this.updateTimerUI(this.timeRemaining, seconds);
-
-            if (this.timeRemaining <= 0) {
-              isOvertime = true;
-              label.textContent = 'Overtime Recorded';
-              label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
-              display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
-              fill.className = 'h-full bg-red-500';
-            }
-          } else {
-            const overSeconds = this.timeElapsed - seconds;
-            display.textContent = `+${this.formatTime(overSeconds)}`;
-          }
-        }, 1000);
-      },
-
-      updateTimerUI(rem, total) {
-        const display = document.getElementById('timer-display');
-        const fill = document.getElementById('timer-progress-fill');
-        display.textContent = this.formatTime(rem);
-        const pct = Math.max(0, (rem / total) * 100);
-        fill.style.width = `${pct}%`;
-
-        if (rem <= 20 && rem > 0) {
-          display.className = 'font-mono text-2xl font-bold tracking-tight text-amber-600 animate-pulse';
-          fill.className = 'h-full bg-amber-500 transition-all duration-300';
-        }
-      },
-
-      formatTime(s) {
-        const m = Math.floor(Math.abs(s) / 60);
-        const sec = Math.abs(s) % 60;
-        return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-      },
-
-      triggerShowAnswer() {
-        clearInterval(this.timerInterval);
-        const solveTimeStr = this.formatTime(this.timeElapsed);
-        document.getElementById('review-elapsed-recorded').textContent = solveTimeStr + (this.isOvertime ? ' (Overtime)' : '');
-        document.getElementById('action-bar-solving').classList.add('hidden');
-        document.getElementById('verification-panel').classList.remove('hidden');
-        lucide.createIcons();
-      },
-
-      giveUpCurrentQuestion() {
-        clearInterval(this.timerInterval);
-        document.getElementById('action-bar-solving').classList.add('hidden');
-        document.getElementById('verification-panel').classList.remove('hidden');
-        this.selfGradeOutcome(false, true);
-      },
-
-      selfGradeOutcome(isRight, didGiveUp = false) {
-        const currentQ = this.currentReviewQueue[this.currentCardIndex];
-        const bankIndex = this.questionBank.findIndex(q => q.id === currentQ.id);
-
-        if (bankIndex !== -1) {
-          const q = this.questionBank[bankIndex];
-          q.attempts.total = (q.attempts.total || 0) + 1;
-          if (!q.history) q.history = [];
-
-          if (isRight) {
-            q.attempts.correct = (q.attempts.correct || 0) + 1;
-            q.history.push('✅');
-            this.showToast('Mastery logged: Question marked Correct!', 'check');
-          } else if (didGiveUp) {
-            q.attempts.gaveUp = (q.attempts.gaveUp || 0) + 1;
-            q.history.push('🏳️');
-            this.showToast('Logged as Gave Up. Prioritized for next draw.');
-          } else {
-            q.attempts.incorrect = (q.attempts.incorrect || 0) + 1;
-            q.history.push('❌');
-            this.showToast('Incorrect logged. Boosted in future shuffles.');
-          }
-
-          q.accuracy = Math.round((q.attempts.correct / q.attempts.total) * 100);
-          this.saveBankToStorage(true, q);
-        }
-
-        setTimeout(() => this.advanceToNextCard(), 1000);
-      },
-
-      advanceToNextCard() {
-        if (this.currentCardIndex + 1 < this.currentReviewQueue.length) {
-          this.currentCardIndex++;
-          this.renderCurrentCard();
-        } else {
-          clearInterval(this.timerInterval);
-          this.renderSessionComplete();
-        }
-      },
-
-      renderSessionComplete() {
-        clearInterval(this.timerInterval);
-        document.getElementById('review-active-panel').classList.add('hidden');
-        const completePanel = document.getElementById('review-complete-panel');
-        completePanel.classList.remove('hidden');
-
-        const totalCount = this.currentReviewQueue.length;
-        const correctCount = this.currentReviewQueue.filter(q => {
-          const item = this.questionBank.find(b => b.id === q.id);
-          return item && item.history && item.history[item.history.length - 1] === '✅';
-        }).length;
-        const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-
-        document.getElementById('complete-total-count').textContent = totalCount;
-        document.getElementById('complete-correct-count').textContent = `${correctCount} / ${totalCount}`;
-        document.getElementById('complete-accuracy').textContent = `${accuracy}%`;
-
-        const quotaId = `badge-${this.currentSlot}-quota`;
-        const badgeElem = document.getElementById(quotaId);
-        if (badgeElem) badgeElem.textContent = `${totalCount}/${totalCount} Done`;
-
-        lucide.createIcons();
-        this.showToast('🎉 Review Batch Completed!');
-      },
-
-      requestHint() {
-        const q = this.currentReviewQueue[this.currentCardIndex];
-        const hintBox = document.getElementById('hint-container');
-        const hintText = document.getElementById('hint-text');
-        hintText.textContent = `Focus on the core principle in ${q.chapter}. Setup the governing equation before substituting values.`;
-        hintBox.classList.remove('hidden');
-        lucide.createIcons();
-      },
-
-      handleFileSelect(e, shotType) {
-        const file = e.target.files[0];
-        if (!file) return;
-        this.readFileAsCompressedDataURL(file, dataUrl => {
-          if (shotType === 'a') {
-            this.uploadedShotA = dataUrl;
-            document.getElementById('placeholder-box-a').classList.add('hidden');
-            document.getElementById('preview-box-a').classList.remove('hidden');
-            document.getElementById('img-preview-a').src = dataUrl;
-          } else {
-            this.uploadedShotB = dataUrl;
-            document.getElementById('placeholder-box-b').classList.add('hidden');
-            document.getElementById('preview-box-b').classList.remove('hidden');
-            document.getElementById('img-preview-b').src = dataUrl;
-          }
-        });
-      },
-
-      initClipboardListener() {
-        window.addEventListener('paste', e => {
-          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-          for (let item of items) {
-            if (item.kind === 'file' && item.type.startsWith('image/')) {
-              const blob = item.getAsFile();
-              this.readFileAsCompressedDataURL(blob, dataUrl => {
-                if (!this.uploadedShotA) {
-                  this.uploadedShotA = dataUrl;
-                  document.getElementById('placeholder-box-a').classList.add('hidden');
-                  document.getElementById('preview-box-a').classList.remove('hidden');
-                  document.getElementById('img-preview-a').src = dataUrl;
-                  this.showToast('Pasted screenshot into Shot A (Question)');
-                } else {
-                  this.uploadedShotB = dataUrl;
-                  document.getElementById('placeholder-box-b').classList.add('hidden');
-                  document.getElementById('preview-box-b').classList.remove('hidden');
-                  document.getElementById('img-preview-b').src = dataUrl;
-                  this.showToast('Pasted screenshot into Shot B (Solution)');
-                }
-              });
-            }
-          }
-        });
-      },
-
-      readFileAsCompressedDataURL(file, callback) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const maxDim = 1200;
-            let w = img.width;
-            let h = img.height;
-            if (w > maxDim || h > maxDim) {
-              if (w > h) { h = (h / w) * maxDim; w = maxDim; }
-              else { w = (w / h) * maxDim; h = maxDim; }
-            }
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            callback(canvas.toDataURL('image/jpeg', 0.85));
-          };
-          img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-      },
-
-      updateDefaultTimerByDifficulty() {
-        const diff = document.getElementById('ingest-difficulty').value;
-        const timerInput = document.getElementById('ingest-timer');
-        if (diff === 'Easy') timerInput.value = 90;
-        else if (diff === 'Medium') timerInput.value = 180;
-        else if (diff === 'Hard') timerInput.value = 300;
-      },
-
-      saveNewQuestion(e) {
-        e.preventDefault();
-        if (!this.uploadedShotA || !this.uploadedShotB) {
-          this.showToast('Please provide both Question and Solution snapshots!', 'alert-circle');
-          return;
-        }
-
-        const subj = document.getElementById('ingest-subject').value.trim();
-        const prefix = (subj || 'Q').slice(0, 3).toUpperCase();
-        const displayId = `#${prefix}-${String(this.questionBank.length + 1).padStart(3, '0')}`;
-
-        const newQ = {
-          id: 'q_' + Date.now(),
-          displayId: displayId,
-          subject: subj,
-          chapter: document.getElementById('ingest-chapter').value.trim(),
-          difficulty: document.getElementById('ingest-difficulty').value,
-          allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 180,
-          quickKey: document.getElementById('ingest-quick-key').value.trim() || 'See Solution Derivation',
-          shotA: this.uploadedShotA,
-          shotB: this.uploadedShotB,
-          attempts: { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
-          accuracy: 0,
-          history: []
-        };
-
-        this.questionBank.unshift(newQ);
-        this.saveBankToStorage(true, newQ);
-        this.showToast(`Mistake ${displayId} saved and synced!`);
-
-        document.getElementById('ingest-form').reset();
-        this.uploadedShotA = null;
-        this.uploadedShotB = null;
-        document.getElementById('placeholder-box-a').classList.remove('hidden');
-        document.getElementById('preview-box-a').classList.add('hidden');
-        document.getElementById('placeholder-box-b').classList.remove('hidden');
-        document.getElementById('preview-box-b').classList.add('hidden');
-
-        this.switchTab('bank');
-      },
-
-      saveBankToStorage(pushToCloud = false, questionToSync = null) {
-        localStorage.setItem('retain_bank_v2', JSON.stringify(this.questionBank));
-        this.updateBankCounters();
-        if (pushToCloud && questionToSync) {
-          this.syncQuestionToCloud(questionToSync);
-        }
-      },
-
-      updateBankCounters() {
-        document.getElementById('tab-bank-count').textContent = this.questionBank.length;
-        document.getElementById('stat-total-q').textContent = this.questionBank.length;
-        if (this.questionBank.length > 0) {
-          const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts.total || 0), 0);
-          const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts.correct || 0), 0);
-          const avg = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
-          document.getElementById('stat-avg-accuracy').textContent = `${avg}%`;
-        }
-      },
-
-      // Render Ledger with Visual Question Thumbnails & IDs
-      renderBankTable() {
-        const grid = document.getElementById('bank-grid');
-        const search = document.getElementById('bank-search').value.toLowerCase();
-        const diffFilter = document.getElementById('bank-filter-diff').value;
-
-        const filtered = this.questionBank.filter(q => {
-          const qid = (q.displayId || '').toLowerCase();
-          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search) || qid.includes(search);
-          const matchDiff = diffFilter === 'ALL' || q.difficulty === diffFilter;
-          return matchSearch && matchDiff;
-        });
-
-        if (filtered.length === 0) {
-          grid.innerHTML = '<div class="col-span-full py-12 text-center text-gray-400 text-sm">No mistakes match the filter.</div>';
-          return;
-        }
-
-        grid.innerHTML = filtered.map(q => `
-          <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
-            
-            <!-- Top Image Thumbnail Preview -->
-            <div onclick="app.openPreviewModal('${q.id}')" class="relative bg-gray-50 dark:bg-black/30 h-40 border-b border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer flex items-center justify-center group-hover:opacity-95 transition">
-              <img src="${q.shotA}" class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-200" alt="Question Preview">
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
-                <i data-lucide="eye" class="w-4 h-4"></i> Inspect Question
-              </div>
-              <span class="absolute top-2 left-2 font-mono text-[11px] font-bold text-ms-blue bg-white/90 dark:bg-gray-900/90 px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-900">
-                ${q.displayId || '#Q'}
-              </span>
-            </div>
-
-            <!-- Card Body -->
-            <div class="p-4 space-y-2.5">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-ms-blue uppercase tracking-wider text-[11px]">${q.subject}</span>
-                <span class="px-2 py-0.5 rounded font-bold text-[10px] ${
-                  q.difficulty === 'Hard' ? 'bg-red-100 text-red-700 dark:bg-red-950/60' :
-                  q.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60' :
-                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60'
-                }">${q.difficulty}</span>
-              </div>
-              
-              <h4 class="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">${q.chapter}</h4>
-              <div class="text-[11px] text-gray-400 truncate">Key: <strong class="text-gray-700 dark:text-gray-300 font-mono">${q.quickKey || 'Full Derivation'}</strong></div>
-            </div>
-
-            <!-- Card Footer -->
-            <div class="px-4 py-3 bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
-              <div class="flex items-center gap-1.5">
-                <span class="text-gray-400 text-[11px]">History:</span>
-                <span class="font-mono text-gray-700 dark:text-gray-300">${(q.history || []).slice(-4).join(' ') || 'Fresh'}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="font-bold ${q.accuracy >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${q.accuracy}% acc</span>
-                <button onclick="app.openPreviewModal('${q.id}')" title="Inspect" class="p-1.5 rounded text-gray-400 hover:text-ms-blue hover:bg-white dark:hover:bg-gray-700 transition">
-                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="app.deleteQuestion('${q.id}')" title="Delete" class="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-gray-700 transition">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        `).join('');
-        lucide.createIcons();
-      },
-
-      initNotificationEngine() {
-        this.updateNotificationUI();
-        setInterval(() => this.checkDailyReviewPushes(), 60000);
-      },
-
-      updateNotificationUI() {
-        const hasPerm = ('Notification' in window) && Notification.permission === 'granted';
-        const statusInd = document.getElementById('perm-status-indicator');
-        const statusText = document.getElementById('perm-status-text');
-        const navIcon = document.getElementById('nav-notif-icon');
-        const navLabel = document.getElementById('nav-notif-label');
-
-        if (hasPerm) {
-          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
-          statusText.textContent = 'System Alerts: Active on this Device';
-          navIcon.className = 'w-3.5 h-3.5 text-emerald-500';
-          navLabel.textContent = 'Alerts Active';
-        } else {
-          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
-          statusText.textContent = 'System Alerts: Permission Needed';
-          navIcon.className = 'w-3.5 h-3.5 text-amber-500';
-          navLabel.textContent = 'Alerts Pending';
-        }
-        lucide.createIcons();
-      },
-
-      async requestNotificationPermission() {
-        if (!('Notification' in window)) return;
-        const perm = await Notification.requestPermission();
-        this.updateNotificationUI();
-        if (perm === 'granted') {
-          this.showToast('Push Alerts Enabled!', 'check');
-        }
-      },
-
-      testNotificationFire() {
-        if (Notification.permission !== 'granted') {
-          this.requestNotificationPermission();
-          return;
-        }
-        new Notification('☀️ Morning Review Ready (10 Questions)', {
-          body: 'Your failure-weighted review batch is ready. Tap to solve!'
-        });
-        this.showToast('Test alert dispatched!');
-      },
-
-      checkDailyReviewPushes() {
-        if (Notification.permission !== 'granted') return;
-        const now = new Date();
-        const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        const todayDate = now.toISOString().split('T')[0];
-
-        const slots = [
-          { key: 'morning', time: document.getElementById('cfg-time-morning').value, title: '☀️ Morning Review Batch', body: '10 shuffled questions are queued. Maintain your streak!' },
-          { key: 'midday',  time: document.getElementById('cfg-time-midday').value,  title: '🌤️ Midday Checkpoint', body: 'Midday sprint ready. Review high-error formulas.' },
-          { key: 'evening', time: document.getElementById('cfg-time-evening').value, title: '🌙 Evening Deep Dive', body: 'Clear your mistake backlog for today!' }
-        ];
-
-        slots.forEach(slot => {
-          const flagKey = `retain_alert_fired_${todayDate}_${slot.key}`;
-          if (currentHHMM === slot.time && !localStorage.getItem(flagKey)) {
-            new Notification(slot.title, { body: slot.body });
-            localStorage.setItem(flagKey, 'true');
-          }
-        });
-      },
-
       saveScheduleConfig() {
         const cfg = {
-          mTime: document.getElementById('cfg-time-morning').value,
           mQuota: document.getElementById('cfg-quota-morning').value,
-          dTime: document.getElementById('cfg-time-midday').value,
           dQuota: document.getElementById('cfg-quota-midday').value,
-          eTime: document.getElementById('cfg-time-evening').value,
           eQuota: document.getElementById('cfg-quota-evening').value
         };
         localStorage.setItem('retain_schedule_cfg', JSON.stringify(cfg));
@@ -1568,11 +1570,8 @@
       loadScheduleConfig() {
         const cfg = JSON.parse(localStorage.getItem('retain_schedule_cfg'));
         if (cfg) {
-          document.getElementById('cfg-time-morning').value = cfg.mTime || '08:00';
           document.getElementById('cfg-quota-morning').value = cfg.mQuota || '10';
-          document.getElementById('cfg-time-midday').value = cfg.dTime || '14:00';
           document.getElementById('cfg-quota-midday').value = cfg.dQuota || '10';
-          document.getElementById('cfg-time-evening').value = cfg.eTime || '20:30';
           document.getElementById('cfg-quota-evening').value = cfg.eQuota || '20';
         }
         this.updateQuotaBadges();
@@ -1582,38 +1581,6 @@
         document.getElementById('badge-morning-quota').textContent = `0/${document.getElementById('cfg-quota-morning').value}`;
         document.getElementById('badge-midday-quota').textContent = `0/${document.getElementById('cfg-quota-midday').value}`;
         document.getElementById('badge-evening-quota').textContent = `0/${document.getElementById('cfg-quota-evening').value}`;
-      },
-
-      exportDataJSON() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.questionBank, null, 2));
-        const a = document.createElement('a');
-        a.href = dataStr;
-        a.download = `retain_mistake_bank_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        this.showToast('JSON backup exported!');
-      },
-
-      importDataJSON(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-          try {
-            const imported = JSON.parse(ev.target.result);
-            if (Array.isArray(imported)) {
-              this.questionBank = imported;
-              this.ensureDisplayIds();
-              this.saveBankToStorage(false);
-              this.showToast(`Imported ${imported.length} questions!`);
-              this.launchSlotReview('morning');
-            }
-          } catch (err) {
-            this.showToast('Invalid JSON file.', 'alert-circle');
-          }
-        };
-        reader.readAsText(file);
       },
 
       zoomImage(type) {
