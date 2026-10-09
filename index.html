@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Microsoft Retain — Mistake Mastery Engine</title>
+  
+  <!-- Apple Web App & PWA Meta for iPad / iOS Home Screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Retain">
+  <meta name="theme-color" content="#0078D4">
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Official Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ms: {
+              blue: '#0078D4',
+              hover: '#106EBE',
+              dark: '#004578',
+              light: '#EFF6FC',
+              amber: '#D83B01',
+              green: '#107C41',
+              subtle: '#F3F2F1',
+              darkBg: '#1B1A19',
+              darkCard: '#252423'
+            }
+          },
+          fontFamily: {
+            segoe: ['"Segoe UI"', '-apple-system', 'BlinkMacSystemFont', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .acrylic {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c8c6c4;
+      border-radius: 3px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #484644;
+    }
+  </style>
+</head>
+<body class="bg-[#F8F9FA] dark:bg-[#121212] text-[#242424] dark:text-[#E1DFDD] font-segoe min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ================= TOP FLUENT NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#1E1E1E]/80 border-b border-gray-200 dark:border-gray-800 acrylic">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Cloud Sync Status -->
+      <div class="flex items-center gap-3">
+        <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
+          <div class="bg-[#F25022]"></div>
+          <div class="bg-[#7FBA00]"></div>
+          <div class="bg-[#00A4EF]"></div>
+          <div class="bg-[#FFB900]"></div>
+        </div>
+        <div>
+          <span class="font-semibold text-lg tracking-tight flex items-center gap-1.5">
+            Microsoft <span class="text-ms-blue font-bold">Retain</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-ms-light text-ms-blue dark:bg-ms-dark/50">Core</span>
+          </span>
+        </div>
+        
+        <!-- Realtime WebSocket Status Pill -->
+        <button onclick="app.switchTab('settings')" id="cloud-status-pill" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 transition">
+          <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span id="cloud-status-text" class="text-gray-600 dark:text-gray-300">Connecting...</span>
+        </button>
+      </div>
+
+      <!-- Center Quota Status Pills -->
+      <div class="hidden md:flex items-center gap-2 bg-gray-100 dark:bg-gray-800/60 p-1 rounded-full text-xs font-medium">
+        <button onclick="app.launchSlotReview('morning')" class="px-3 py-1 rounded-full flex items-center gap-1.5 transition hover:bg-white dark:hover:bg-gray-700 shadow-sm" id="slot-pill-morning">
+          <span>☀️ Morning</span>
+          <span class="bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300 px-1.5 py-0.2 rounded-full font-bold text-[10px]" id="badge-morning-quota">0/10</span>
+        </button>
+        <button onclick="app.launchSlotReview('midday')" class="px-3 py-1 rounded-full flex items-center gap-1.5 transition hover:bg-white dark:hover:bg-gray-700" id="slot-pill-midday">
+          <span>🌤️ Midday</span>
+          <span class="bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300 px-1.5 py-0.2 rounded-full font-bold text-[10px]" id="badge-midday-quota">0/10</span>
+        </button>
+        <button onclick="app.launchSlotReview('evening')" class="px-3 py-1 rounded-full flex items-center gap-1.5 transition hover:bg-white dark:hover:bg-gray-700" id="slot-pill-evening">
+          <span>🌙 Evening</span>
+          <span class="bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300 px-1.5 py-0.2 rounded-full font-bold text-[10px]" id="badge-evening-quota">0/20</span>
+        </button>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Notification Status Button -->
+        <button onclick="app.switchTab('settings')" id="nav-notif-btn" class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-500" id="nav-notif-icon"></i>
+          <span id="nav-notif-label" class="hidden sm:inline">Alerts Pending</span>
+        </button>
+
+        <!-- Streak Counter -->
+        <div class="flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 rounded-md text-xs font-semibold border border-amber-200 dark:border-amber-800">
+          <i data-lucide="flame" class="w-4 h-4 fill-amber-500 text-amber-500"></i>
+          <span id="stat-streak">3 Day Streak</span>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button onclick="app.toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+          <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SUB-NAVIGATION TABS ================= -->
+  <div class="bg-white dark:bg-[#1E1E1E] border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-6 text-sm font-medium">
+      <button onclick="app.switchTab('review')" id="tab-review" class="py-3 border-b-2 border-ms-blue text-ms-blue font-semibold flex items-center gap-2">
+        <i data-lucide="play-circle" class="w-4 h-4"></i> Practice Session
+      </button>
+      <button onclick="app.switchTab('ingest')" id="tab-ingest" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-2">
+        <i data-lucide="camera" class="w-4 h-4"></i> Add Mistake (Dual-Shot)
+      </button>
+      <button onclick="app.switchTab('bank')" id="tab-bank" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-2">
+        <i data-lucide="layers" class="w-4 h-4"></i> Mistake Ledger (<span id="tab-bank-count">0</span>)
+      </button>
+      <button onclick="app.switchTab('settings')" id="tab-settings" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4"></i> Cloud & Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MAIN CONTENT VIEWPORT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+
+    <!-- VIEW 1: ACTIVE REVIEW SESSION -->
+    <section id="view-review" class="space-y-6">
+      
+      <!-- Session Header Bar -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
+            <i data-lucide="shuffle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="review-subject-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800">Physics</span>
+              <span id="review-chapter-badge" class="text-xs text-gray-500 dark:text-gray-400 font-medium">Rotational Dynamics</span>
+              <span id="review-difficulty-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-3">
+              <span>Card <strong id="review-current-index" class="text-gray-800 dark:text-gray-200">1</strong> of <strong id="review-total-count">10</strong></span>
+              <span>• Lifetime History: <span id="review-history-dots" class="font-mono">❌ ❌ ⚠️</span></span>
+              <span>• Solve Accuracy: <strong id="review-card-accuracy" class="text-amber-600">33%</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Countdown Timer Engine -->
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-[10px] uppercase font-bold text-gray-400" id="timer-status-label">Time Remaining</div>
+            <div class="font-mono text-2xl font-bold tracking-tight text-ms-blue" id="timer-display">03:00</div>
+          </div>
+          <div class="w-10 h-10 rounded-full border-2 border-ms-blue flex items-center justify-center text-ms-blue" id="timer-indicator-circle">
+            <i data-lucide="clock" class="w-5 h-5"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question & Solution Viewport Card -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 overflow-hidden">
+        
+        <!-- Timer Progress Bar -->
+        <div class="w-full bg-gray-100 dark:bg-gray-800 h-1.5 overflow-hidden">
+          <div id="timer-progress-fill" class="h-full bg-ms-blue transition-all duration-300" style="width: 100%;"></div>
+        </div>
+
+        <div class="p-6 sm:p-8 space-y-6">
+          
+          <!-- STAGE 1: SHOT A (Question Image Canvas) -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i> Shot A: Question Snapshot
+              </span>
+              <button onclick="app.zoomImage('question')" class="text-xs text-ms-blue hover:underline flex items-center gap-1">
+                <i data-lucide="maximize-2" class="w-3 h-3"></i> Full Resolution
+              </button>
+            </div>
+            
+            <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 overflow-hidden flex items-center justify-center min-h-[260px] p-2 relative group">
+              <img id="review-shot-a-img" src="" alt="Question" class="max-h-[440px] w-auto object-contain rounded transition duration-200 group-hover:scale-[1.01]">
+            </div>
+          </div>
+
+          <!-- Socratic Hint Box -->
+          <div id="hint-container" class="hidden p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-sm">
+            <div class="flex items-start gap-3">
+              <i data-lucide="sparkles" class="w-5 h-5 text-ms-blue mt-0.5 shrink-0"></i>
+              <div>
+                <strong class="text-blue-900 dark:text-blue-300 font-semibold block mb-0.5">Socratic Conceptual Clue</strong>
+                <p id="hint-text" class="text-blue-800 dark:text-blue-200 text-xs sm:text-sm leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTION BAR 1: ACTIVE SOLVING BUTTONS -->
+          <div id="action-bar-solving" class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div class="flex items-center gap-2">
+              <button onclick="app.requestHint()" class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium flex items-center gap-1.5 transition">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i> Hint
+              </button>
+              <button onclick="app.giveUpCurrentQuestion()" class="px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-medium flex items-center gap-1.5 transition">
+                <i data-lucide="flag" class="w-4 h-4"></i> Give Up (Stuck)
+              </button>
+            </div>
+
+            <!-- PRIMARY TRIGGER: SHOW ANSWER -->
+            <button onclick="app.triggerShowAnswer()" class="px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center gap-2 shadow-sm transition transform active:scale-95">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+              <span>Show Answer & Verify</span>
+            </button>
+          </div>
+
+          <!-- STAGE 2: VERIFICATION & SELF-GRADING BAR -->
+          <div id="verification-panel" class="hidden space-y-6 pt-6 border-t-2 border-dashed border-gray-200 dark:border-gray-800">
+            
+            <!-- Quick Key & Solve Latency Banner -->
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+                  <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Final Answer Key</div>
+                  <div id="review-quick-key" class="text-base font-bold text-gray-900 dark:text-white">Option B / 12 rad/s²</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-gray-400 block">Solve Time Recorded</span>
+                <span id="review-elapsed-recorded" class="text-sm font-mono font-bold text-ms-blue">02:14</span>
+              </div>
+            </div>
+
+            <!-- SHOT B: Solution Image Canvas -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                  <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i> Shot B: Full Step-by-Step Derivation
+                </span>
+                <button onclick="app.zoomImage('solution')" class="text-xs text-ms-blue hover:underline flex items-center gap-1">
+                  <i data-lucide="maximize-2" class="w-3 h-3"></i> Full Resolution
+                </button>
+              </div>
+              
+              <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 overflow-hidden flex items-center justify-center min-h-[260px] p-2 relative">
+                <img id="review-shot-b-img" src="" alt="Solution Derivation" class="max-h-[500px] w-auto object-contain rounded">
+              </div>
+            </div>
+
+            <!-- Self-Grading Decision Controls -->
+            <div class="p-5 rounded-2xl bg-blue-50/50 dark:bg-gray-800/50 border border-blue-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 class="font-bold text-sm text-gray-900 dark:text-white">Compare your rough work with the key</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Did your independent derivation match the answer?</p>
+              </div>
+              <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="app.selfGradeOutcome(false)" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-sm font-semibold flex items-center justify-center gap-2 transition shadow-sm">
+                  <i data-lucide="x" class="w-4 h-4"></i> Got It Wrong
+                </button>
+                <button onclick="app.selfGradeOutcome(true)" class="flex-1 sm:flex-initial px-6 py-2.5 rounded-lg bg-ms-green hover:bg-emerald-700 text-white text-sm font-semibold flex items-center justify-center gap-2 transition shadow-sm">
+                  <i data-lucide="check" class="w-4 h-4"></i> Got It Right
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: DUAL-SHOT INGESTION STUDIO -->
+    <section id="view-ingest" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800">
+        
+        <div class="flex items-center gap-3 pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
+            <i data-lucide="image-plus" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">Dual-Shot Mistake Capture</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Upload paper tests and hand-written solutions. Instantly replicates to all connected devices.</p>
+          </div>
+        </div>
+
+        <form id="ingest-form" onsubmit="app.saveNewQuestion(event)" class="mt-6 space-y-6">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Subject</label>
+              <input type="text" id="ingest-subject" required placeholder="e.g., Physics" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Chapter / Unit</label>
+              <input type="text" id="ingest-chapter" required placeholder="e.g., Electrostatics" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Difficulty</label>
+              <select id="ingest-difficulty" onchange="app.updateDefaultTimerByDifficulty()" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+                <option value="Easy">Easy (90s)</option>
+                <option value="Medium" selected>Medium (180s)</option>
+                <option value="Hard">Hard (300s)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Custom Timer (Sec)</label>
+              <input type="number" id="ingest-timer" value="180" min="20" max="1200" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">
+              🔑 Quick Answer Key (Optional - for rapid verification)
+            </label>
+            <input type="text" id="ingest-quick-key" placeholder="e.g., Option (C) or 4.5 x 10^-3 N or x = 3/2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            <span class="text-[11px] text-gray-400">Revealed immediately upon clicking "Show Answer" so you can confirm without reading the full derivation.</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <!-- Dropzone Shot A -->
+            <div class="space-y-2">
+              <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                <span>Shot A: The Question *</span>
+                <span class="text-[10px] text-gray-400 font-normal">Supports Ctrl+V Paste</span>
+              </span>
+              <div id="drop-shot-a" onclick="document.getElementById('file-shot-a').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[220px] bg-gray-50 dark:bg-black/20">
+                <input type="file" id="file-shot-a" accept="image/*" class="hidden" onchange="app.handleFileSelect(event, 'a')">
+                <div id="preview-box-a" class="hidden w-full h-full">
+                  <img id="img-preview-a" class="max-h-40 mx-auto object-contain rounded">
+                  <span class="text-[11px] text-ms-blue block mt-2">Click to replace photo</span>
+                </div>
+                <div id="placeholder-box-a" class="space-y-2 text-gray-500">
+                  <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400"></i>
+                  <div class="text-xs font-medium">Click, drag & drop, or paste screenshot of <strong class="text-gray-700 dark:text-gray-300">Question</strong></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dropzone Shot B -->
+            <div class="space-y-2">
+              <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                <span>Shot B: The Solution / Derivation *</span>
+                <span class="text-[10px] text-gray-400 font-normal">Collapsed during solve</span>
+              </span>
+              <div id="drop-shot-b" onclick="document.getElementById('file-shot-b').click()" class="border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-ms-blue rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center min-h-[220px] bg-gray-50 dark:bg-black/20">
+                <input type="file" id="file-shot-b" accept="image/*" class="hidden" onchange="app.handleFileSelect(event, 'b')">
+                <div id="preview-box-b" class="hidden w-full h-full">
+                  <img id="img-preview-b" class="max-h-40 mx-auto object-contain rounded">
+                  <span class="text-[11px] text-ms-blue block mt-2">Click to replace photo</span>
+                </div>
+                <div id="placeholder-box-b" class="space-y-2 text-gray-500">
+                  <i data-lucide="file-check" class="w-8 h-8 mx-auto text-gray-400"></i>
+                  <div class="text-xs font-medium">Click, drag & drop, or paste snapshot of <strong class="text-gray-700 dark:text-gray-300">Solution Key</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <button type="button" onclick="app.switchTab('review')" class="px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
+            <button type="submit" class="px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center gap-2">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Save Mistake & Sync
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </section>
+
+    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK -->
+    <section id="view-bank" class="hidden space-y-6">
+      
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Filter by chapter or subject..." class="px-3.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-64">
+          <select id="bank-filter-diff" onchange="app.renderBankTable()" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            <option value="ALL">All Difficulties</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs font-medium text-gray-500">
+          <span>Total Questions: <strong id="stat-total-q" class="text-gray-900 dark:text-white">0</strong></span>
+          <span>Mastery Rate: <strong id="stat-avg-accuracy" class="text-emerald-600 font-bold">0%</strong></span>
+        </div>
+      </div>
+
+      <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+
+    </section>
+
+    <!-- VIEW 4: CLOUD & SCHEDULE SETTINGS -->
+    <section id="view-settings" class="hidden max-w-4xl mx-auto space-y-6">
+      
+      <!-- Supabase Cloud Sync Card -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
+        
+        <div class="flex items-start justify-between gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600">
+              <i data-lucide="database" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">Supabase Realtime Cloud Sync</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Pre-configured to your private cloud database. Syncs questions across Laptop and iPad in real time.</p>
+            </div>
+          </div>
+          <span id="sb-status-badge" class="px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+            Connecting...
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Project URL</label>
+            <input type="text" id="sb-url-input" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none font-mono text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">anon public API Key</label>
+            <input type="password" id="sb-key-input" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none font-mono text-xs">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-2">
+            <button onclick="app.saveSupabaseConfig()" class="px-4 py-2 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="link-2" class="w-4 h-4"></i> Reconnect
+            </button>
+            <button onclick="app.fetchCloudQuestions()" class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i> Pull Cloud Data
+            </button>
+          </div>
+          <button onclick="app.pushAllLocalToCloud()" class="px-4 py-2 rounded-lg border border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Push Local Bank to Cloud
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Push Alerts Settings -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
+        
+        <div class="flex items-center gap-3 pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">Cross-Surface Push Delivery</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Pushes review alerts to Windows Action Center, macOS notifications, and iPad Lock Screen.</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <div class="text-sm font-bold flex items-center gap-2">
+              <span id="perm-status-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span id="perm-status-text">System Alerts: Permission Needed</span>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Click below to authorize OS-level push notifications on this device.</p>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="app.requestNotificationPermission()" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="shield-check" class="w-4 h-4"></i> Enable Alerts
+            </button>
+            <button onclick="app.testNotificationFire()" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="send" class="w-4 h-4"></i> Test Alert
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Daily Scheduled Review Slots -->
+        <div class="space-y-4">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Quota Management</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm flex items-center gap-1.5">☀️ Morning Slot</span>
+                <span class="text-[10px] text-blue-600 font-bold bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded">Active</span>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
+                <input type="time" id="cfg-time-morning" value="08:00" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
+                <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm flex items-center gap-1.5">🌤️ Midday Slot</span>
+                <span class="text-[10px] text-amber-600 font-bold bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">Active</span>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
+                <input type="time" id="cfg-time-midday" value="14:00" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
+                <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-sm flex items-center gap-1.5">🌙 Evening Slot</span>
+                <span class="text-[10px] text-purple-600 font-bold bg-purple-50 dark:bg-purple-950 px-1.5 py-0.5 rounded">Active</span>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Trigger Time</label>
+                <input type="time" id="cfg-time-evening" value="20:30" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-400 mb-1">Batch Quota (Questions)</label>
+                <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Manual Backup Fallback -->
+        <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold">Manual Backup File</h4>
+            <p class="text-xs text-gray-500">Export your mistake library as JSON for offline backup.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="app.exportDataJSON()" class="px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON
+            </button>
+            <label class="px-3.5 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import JSON
+              <input type="file" id="import-json-file" accept=".json" class="hidden" onchange="app.importDataJSON(event)">
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= IMAGE EXPAND MODAL ================= -->
+  <div id="modal-zoom" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
+    <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
+      <button onclick="app.closeZoomModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 p-2 text-sm font-bold flex items-center gap-1">
+        <i data-lucide="x" class="w-5 h-5"></i> Close
+      </button>
+      <img id="zoom-img-target" src="" class="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl">
+    </div>
+  </div>
+
+  <!-- ================= FLUENT TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-gray-700 text-sm">
+      <i data-lucide="info" class="w-4 h-4 text-ms-blue" id="toast-icon"></i>
+      <span id="toast-message">Notification message</span>
+    </div>
+  </div>
+
+  <!-- ================= APPLICATION SCRIPT ================= -->
+  <script>
+    // PRE-CONFIGURED SUPABASE CREDENTIALS
+    const DEFAULT_SB_URL = 'https://nphsajjviogkllkunnvf.supabase.co';
+    const DEFAULT_SB_KEY = 'sb_publishable_lEW0PHBY-ixtUryfB2lkaw_6nm2AKB_';
+
+    const sampleQuestionA = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="280" viewBox="0 0 600 280"><rect width="100%" height="100%" fill="%23FFFFFF"/><text x="30" y="45" font-family="sans-serif" font-size="18" font-weight="bold" fill="%230078D4">Rotational Dynamics: Rolling Without Slipping</text><text x="30" y="80" font-family="sans-serif" font-size="14" fill="%23242424">A uniform cylinder of mass M = 4 kg and radius R = 0.5 m rolls without</text><text x="30" y="105" font-family="sans-serif" font-size="14" fill="%23242424">slipping down an incline of angle θ = 30°. What is the linear acceleration</text><text x="30" y="130" font-family="sans-serif" font-size="14" fill="%23242424">of its center of mass? (Take g = 9.8 m/s²)</text><line x1="30" y1="240" x2="350" y2="240" stroke="%23333" stroke-width="3"/><line x1="30" y1="240" x2="300" y2="170" stroke="%23333" stroke-width="4"/><circle cx="180" cy="175" r="30" fill="%23EFF6FC" stroke="%230078D4" stroke-width="3"/><circle cx="180" cy="175" r="3" fill="%23D83B01"/><path d="M 120 240 A 60 60 0 0 0 100 220" fill="none" stroke="%23D83B01" stroke-width="2"/><text x="130" y="235" font-family="sans-serif" font-size="12" fill="%23D83B01">θ = 30°</text></svg>';
+
+    const sampleSolutionA = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="320" viewBox="0 0 600 320"><rect width="100%" height="100%" fill="%23FFFFFF"/><text x="30" y="40" font-family="sans-serif" font-size="16" font-weight="bold" fill="%23107C41">Step-by-Step Derivation & Solution Key</text><text x="30" y="75" font-family="sans-serif" font-size="13" fill="%23333">1. Equation of motion along incline: M·g·sin(θ) - f = M·a</text><text x="30" y="105" font-family="sans-serif" font-size="13" fill="%23333">2. Torque about center of mass: τ = f·R = I·α = (1/2·M·R²)·(a / R)</text><text x="30" y="135" font-family="sans-serif" font-size="13" fill="%23333">3. Friction force: f = (1/2)·M·a</text><text x="30" y="165" font-family="sans-serif" font-size="13" fill="%23333">4. Substitute into (1): M·g·sin(θ) - (1/2)·M·a = M·a  ➔  a = (2/3)·g·sin(θ)</text><text x="30" y="200" font-family="sans-serif" font-size="13" fill="%23333">5. Numerical Evaluation: a = (2/3) × 9.8 × sin(30°) = (2/3) × 9.8 × 0.5</text><rect x="30" y="230" width="360" height="45" fill="%23DFF6DD" rx="6"/><text x="45" y="258" font-family="sans-serif" font-size="15" font-weight="bold" fill="%23107C41">FINAL KEY: a = 3.27 m/s² (Option B)</text></svg>';
+
+    const app = {
+      questionBank: JSON.parse(localStorage.getItem('retain_bank_v2')) || [
+        {
+          id: 'q_rotational_1',
+          subject: 'Physics',
+          chapter: 'Rotational Dynamics',
+          difficulty: 'Hard',
+          allocatedTime: 300,
+          quickKey: 'Option B / 3.27 m/s²',
+          shotA: sampleQuestionA,
+          shotB: sampleSolutionA,
+          attempts: { total: 3, correct: 1, incorrect: 2, gaveUp: 0 },
+          accuracy: 33,
+          history: ['❌', '❌', '✅']
+        }
+      ],
+      currentReviewQueue: [],
+      currentCardIndex: 0,
+      timerInterval: null,
+      timeRemaining: 0,
+      timeElapsed: 0,
+      isOvertime: false,
+      currentSlot: 'morning',
+      sbClient: null,
+      sbRealtimeChannel: null,
+      uploadedShotA: null,
+      uploadedShotB: null,
+
+      init() {
+        lucide.createIcons();
+        this.updateBankCounters();
+        this.initNotificationEngine();
+        this.initClipboardListener();
+        this.loadScheduleConfig();
+        this.initSupabase();
+        this.launchSlotReview('morning');
+      },
+
+      initSupabase() {
+        const url = localStorage.getItem('retain_sb_url') || DEFAULT_SB_URL;
+        const key = localStorage.getItem('retain_sb_key') || DEFAULT_SB_KEY;
+
+        document.getElementById('sb-url-input').value = url;
+        document.getElementById('sb-key-input').value = key;
+
+        if (!window.supabase) {
+          this.setCloudStatus('local');
+          return;
+        }
+
+        try {
+          this.sbClient = window.supabase.createClient(url, key);
+          this.setCloudStatus('connected');
+          this.subscribeRealtime();
+          this.fetchCloudQuestions();
+        } catch (err) {
+          console.error('[Supabase Init Error]', err);
+          this.setCloudStatus('error');
+        }
+      },
+
+      saveSupabaseConfig() {
+        const url = document.getElementById('sb-url-input').value.trim();
+        const key = document.getElementById('sb-key-input').value.trim();
+        if (!url || !key) {
+          this.showToast('Please provide both Project URL and Anon Key.', 'alert-circle');
+          return;
+        }
+        localStorage.setItem('retain_sb_url', url);
+        localStorage.setItem('retain_sb_key', key);
+        this.initSupabase();
+        this.showToast('Connected to Supabase Realtime channel!');
+      },
+
+      setCloudStatus(status) {
+        const badge = document.getElementById('sb-status-badge');
+        const dot = document.getElementById('cloud-status-dot');
+        const text = document.getElementById('cloud-status-text');
+
+        if (status === 'connected') {
+          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+          badge.textContent = 'Realtime Active';
+          dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+          text.textContent = 'Realtime Synced';
+        } else if (status === 'syncing') {
+          dot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-spin';
+          text.textContent = 'Syncing...';
+        } else if (status === 'error') {
+          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300';
+          badge.textContent = 'Error';
+          dot.className = 'w-2 h-2 rounded-full bg-red-500';
+          text.textContent = 'Sync Failed';
+        } else {
+          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
+          badge.textContent = 'Disconnected';
+          dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+          text.textContent = 'Local Only';
+        }
+      },
+
+      subscribeRealtime() {
+        if (!this.sbClient) return;
+        if (this.sbRealtimeChannel) {
+          this.sbClient.removeChannel(this.sbRealtimeChannel);
+        }
+
+        this.sbRealtimeChannel = this.sbClient
+          .channel('realtime:retain_questions')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'retain_questions' }, payload => {
+            this.handleRealtimeRowChange(payload);
+          })
+          .subscribe(status => {
+            if (status === 'SUBSCRIBED') {
+              this.setCloudStatus('connected');
+            }
+          });
+      },
+
+      handleRealtimeRowChange(payload) {
+        const { eventType, new: newRow, old: oldRow } = payload;
+        if (eventType === 'DELETE') {
+          this.questionBank = this.questionBank.filter(q => q.id !== oldRow.id);
+        } else if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const idx = this.questionBank.findIndex(q => q.id === newRow.id);
+          const mapped = {
+            id: newRow.id,
+            subject: newRow.subject,
+            chapter: newRow.chapter,
+            difficulty: newRow.difficulty,
+            allocatedTime: newRow.allocated_time,
+            quickKey: newRow.quick_key,
+            shotA: newRow.shot_a,
+            shotB: newRow.shot_b,
+            attempts: newRow.attempts || { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
+            accuracy: newRow.accuracy || 0,
+            history: newRow.history || []
+          };
+          if (idx !== -1) {
+            this.questionBank[idx] = mapped;
+          } else {
+            this.questionBank.unshift(mapped);
+          }
+        }
+        this.saveBankToStorage(false);
+        this.renderBankTable();
+        this.showToast('⚡ Instant Sync: Question updated from another device!');
+      },
+
+      async fetchCloudQuestions() {
+        if (!this.sbClient) return;
+        this.setCloudStatus('syncing');
+
+        const { data, error } = await this.sbClient
+          .from('retain_questions')
+          .select('*')
+          .order('updated_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          this.questionBank = data.map(q => ({
+            id: q.id,
+            subject: q.subject,
+            chapter: q.chapter,
+            difficulty: q.difficulty,
+            allocatedTime: q.allocated_time,
+            quickKey: q.quick_key,
+            shotA: q.shot_a,
+            shotB: q.shot_b,
+            attempts: q.attempts || { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
+            accuracy: q.accuracy || 0,
+            history: q.history || []
+          }));
+          this.saveBankToStorage(false);
+          this.renderBankTable();
+          this.launchSlotReview(this.currentSlot);
+          this.showToast(`☁️ Synced ${data.length} questions from Supabase!`);
+        }
+        this.setCloudStatus('connected');
+      },
+
+      async syncQuestionToCloud(q) {
+        if (!this.sbClient) return;
+        await this.sbClient.from('retain_questions').upsert({
+          id: q.id,
+          subject: q.subject,
+          chapter: q.chapter,
+          difficulty: q.difficulty,
+          allocated_time: q.allocatedTime,
+          quick_key: q.quickKey,
+          shot_a: q.shotA,
+          shot_b: q.shotB,
+          attempts: q.attempts,
+          accuracy: q.accuracy,
+          history: q.history,
+          updated_at: new Date().toISOString()
+        });
+      },
+
+      async pushAllLocalToCloud() {
+        if (!this.sbClient) {
+          this.showToast('Connect Supabase first', 'alert-circle');
+          return;
+        }
+        this.setCloudStatus('syncing');
+        const rows = this.questionBank.map(q => ({
+          id: q.id,
+          subject: q.subject,
+          chapter: q.chapter,
+          difficulty: q.difficulty,
+          allocated_time: q.allocatedTime,
+          quick_key: q.quickKey,
+          shot_a: q.shotA,
+          shot_b: q.shotB,
+          attempts: q.attempts,
+          accuracy: q.accuracy,
+          history: q.history,
+          updated_at: new Date().toISOString()
+        }));
+
+        const { error } = await this.sbClient.from('retain_questions').upsert(rows);
+        if (!error) {
+          this.showToast(`☁️ Pushed ${rows.length} questions to cloud!`);
+          this.setCloudStatus('connected');
+        } else {
+          this.showToast('Push failed: ' + error.message, 'alert-circle');
+          this.setCloudStatus('error');
+        }
+      },
+
+      switchTab(tabId) {
+        ['review', 'ingest', 'bank', 'settings'].forEach(id => {
+          document.getElementById(`view-${id}`).classList.add('hidden');
+          document.getElementById(`tab-${id}`).classList.remove('border-ms-blue', 'text-ms-blue', 'font-semibold');
+          document.getElementById(`tab-${id}`).classList.add('border-transparent', 'text-gray-500');
+        });
+        document.getElementById(`view-${tabId}`).classList.remove('hidden');
+        document.getElementById(`tab-${tabId}`).classList.add('border-ms-blue', 'text-ms-blue', 'font-semibold');
+        document.getElementById(`tab-${tabId}`).classList.remove('border-transparent', 'text-gray-500');
+
+        if (tabId === 'bank') this.renderBankTable();
+        lucide.createIcons();
+      },
+
+      toggleDarkMode() {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('retain_dark_mode', document.documentElement.classList.contains('dark'));
+      },
+
+      showToast(msg, icon = 'info') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = msg;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+      },
+
+      launchSlotReview(slot) {
+        this.currentSlot = slot;
+        const quotaMap = {
+          morning: parseInt(document.getElementById('cfg-quota-morning').value) || 10,
+          midday: parseInt(document.getElementById('cfg-quota-midday').value) || 10,
+          evening: parseInt(document.getElementById('cfg-quota-evening').value) || 20
+        };
+        const quota = quotaMap[slot] || 10;
+
+        if (this.questionBank.length === 0) {
+          this.showToast('No mistakes logged yet.', 'alert-circle');
+          this.switchTab('ingest');
+          return;
+        }
+
+        const weightedPool = [...this.questionBank].map(q => {
+          const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
+          return { item: q, weight: 1 + failureCount * 2.5 };
+        });
+
+        const shuffled = [];
+        const poolCopy = [...weightedPool];
+
+        while (shuffled.length < quota && poolCopy.length > 0) {
+          const totalWeight = poolCopy.reduce((sum, el) => sum + el.weight, 0);
+          let randomVal = Math.random() * totalWeight;
+          let chosenIndex = 0;
+
+          for (let i = 0; i < poolCopy.length; i++) {
+            randomVal -= poolCopy[i].weight;
+            if (randomVal <= 0) {
+              chosenIndex = i;
+              break;
+            }
+          }
+          shuffled.push(poolCopy[chosenIndex].item);
+          poolCopy.splice(chosenIndex, 1);
+        }
+
+        this.currentReviewQueue = shuffled;
+        this.currentCardIndex = 0;
+        this.switchTab('review');
+        this.renderCurrentCard();
+      },
+
+      renderCurrentCard() {
+        if (this.currentReviewQueue.length === 0) return;
+        const q = this.currentReviewQueue[this.currentCardIndex];
+
+        document.getElementById('verification-panel').classList.add('hidden');
+        document.getElementById('hint-container').classList.add('hidden');
+        document.getElementById('action-bar-solving').classList.remove('hidden');
+
+        document.getElementById('review-subject-badge').textContent = q.subject;
+        document.getElementById('review-chapter-badge').textContent = q.chapter;
+        document.getElementById('review-difficulty-badge').textContent = q.difficulty;
+        document.getElementById('review-current-index').textContent = this.currentCardIndex + 1;
+        document.getElementById('review-total-count').textContent = this.currentReviewQueue.length;
+        document.getElementById('review-history-dots').textContent = (q.history && q.history.length > 0) ? q.history.slice(-4).join(' ') : 'Fresh';
+        document.getElementById('review-card-accuracy').textContent = `${q.accuracy || 0}%`;
+
+        document.getElementById('review-shot-a-img').src = q.shotA;
+        document.getElementById('review-shot-b-img').src = q.shotB;
+        document.getElementById('review-quick-key').textContent = q.quickKey || 'Full working displayed in Shot B';
+
+        this.startCardTimer(q.allocatedTime || 180);
+        lucide.createIcons();
+      },
+
+      startCardTimer(seconds) {
+        clearInterval(this.timerInterval);
+        this.timeRemaining = seconds;
+        this.timeElapsed = 0;
+        this.isOvertime = false;
+
+        const display = document.getElementById('timer-display');
+        const fill = document.getElementById('timer-progress-fill');
+        const label = document.getElementById('timer-status-label');
+        label.textContent = 'Time Remaining';
+        label.className = 'text-[10px] uppercase font-bold text-gray-400';
+        display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
+        fill.className = 'h-full bg-ms-blue transition-all duration-300';
+
+        this.updateTimerUI(this.timeRemaining, seconds);
+
+        this.timerInterval = setInterval(() => {
+          this.timeElapsed++;
+          if (!this.isOvertime) {
+            this.timeRemaining--;
+            this.updateTimerUI(this.timeRemaining, seconds);
+
+            if (this.timeRemaining <= 0) {
+              this.isOvertime = true;
+              label.textContent = 'Overtime Recorded';
+              label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
+              display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
+              fill.className = 'h-full bg-red-500';
+            }
+          } else {
+            const overSeconds = this.timeElapsed - seconds;
+            display.textContent = `+${this.formatTime(overSeconds)}`;
+          }
+        }, 1000);
+      },
+
+      updateTimerUI(rem, total) {
+        const display = document.getElementById('timer-display');
+        const fill = document.getElementById('timer-progress-fill');
+        display.textContent = this.formatTime(rem);
+        const pct = Math.max(0, (rem / total) * 100);
+        fill.style.width = `${pct}%`;
+
+        if (rem <= 20 && rem > 0) {
+          display.className = 'font-mono text-2xl font-bold tracking-tight text-amber-600 animate-pulse';
+          fill.className = 'h-full bg-amber-500 transition-all duration-300';
+        }
+      },
+
+      formatTime(s) {
+        const m = Math.floor(Math.abs(s) / 60);
+        const sec = Math.abs(s) % 60;
+        return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      },
+
+      triggerShowAnswer() {
+        clearInterval(this.timerInterval);
+        const solveTimeStr = this.formatTime(this.timeElapsed);
+        document.getElementById('review-elapsed-recorded').textContent = solveTimeStr + (this.isOvertime ? ' (Overtime)' : '');
+        document.getElementById('action-bar-solving').classList.add('hidden');
+        document.getElementById('verification-panel').classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      giveUpCurrentQuestion() {
+        clearInterval(this.timerInterval);
+        document.getElementById('action-bar-solving').classList.add('hidden');
+        document.getElementById('verification-panel').classList.remove('hidden');
+        this.selfGradeOutcome(false, true);
+      },
+
+      selfGradeOutcome(isRight, didGiveUp = false) {
+        const currentQ = this.currentReviewQueue[this.currentCardIndex];
+        const bankIndex = this.questionBank.findIndex(q => q.id === currentQ.id);
+
+        if (bankIndex !== -1) {
+          const q = this.questionBank[bankIndex];
+          q.attempts.total = (q.attempts.total || 0) + 1;
+          if (!q.history) q.history = [];
+
+          if (isRight) {
+            q.attempts.correct = (q.attempts.correct || 0) + 1;
+            q.history.push('✅');
+            this.showToast('Mastery logged: Question marked Correct!', 'check');
+          } else if (didGiveUp) {
+            q.attempts.gaveUp = (q.attempts.gaveUp || 0) + 1;
+            q.history.push('🏳️');
+            this.showToast('Logged as Gave Up. Prioritized for next draw.');
+          } else {
+            q.attempts.incorrect = (q.attempts.incorrect || 0) + 1;
+            q.history.push('❌');
+            this.showToast('Incorrect logged. Boosted in future shuffles.');
+          }
+
+          q.accuracy = Math.round((q.attempts.correct / q.attempts.total) * 100);
+          this.saveBankToStorage(true, q);
+        }
+
+        setTimeout(() => this.advanceToNextCard(), 1000);
+      },
+
+      advanceToNextCard() {
+        if (this.currentCardIndex + 1 < this.currentReviewQueue.length) {
+          this.currentCardIndex++;
+          this.renderCurrentCard();
+        } else {
+          this.showToast('🎉 Review Batch Completed! Great job.');
+          this.launchSlotReview(this.currentSlot);
+        }
+      },
+
+      requestHint() {
+        const q = this.currentReviewQueue[this.currentCardIndex];
+        const hintBox = document.getElementById('hint-container');
+        const hintText = document.getElementById('hint-text');
+        hintText.textContent = `Focus on the core principle in ${q.chapter}. Setup the governing equation before substituting values.`;
+        hintBox.classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      handleFileSelect(e, shotType) {
+        const file = e.target.files[0];
+        if (!file) return;
+        this.readFileAsCompressedDataURL(file, dataUrl => {
+          if (shotType === 'a') {
+            this.uploadedShotA = dataUrl;
+            document.getElementById('placeholder-box-a').classList.add('hidden');
+            document.getElementById('preview-box-a').classList.remove('hidden');
+            document.getElementById('img-preview-a').src = dataUrl;
+          } else {
+            this.uploadedShotB = dataUrl;
+            document.getElementById('placeholder-box-b').classList.add('hidden');
+            document.getElementById('preview-box-b').classList.remove('hidden');
+            document.getElementById('img-preview-b').src = dataUrl;
+          }
+        });
+      },
+
+      initClipboardListener() {
+        window.addEventListener('paste', e => {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let item of items) {
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+              const blob = item.getAsFile();
+              this.readFileAsCompressedDataURL(blob, dataUrl => {
+                if (!this.uploadedShotA) {
+                  this.uploadedShotA = dataUrl;
+                  document.getElementById('placeholder-box-a').classList.add('hidden');
+                  document.getElementById('preview-box-a').classList.remove('hidden');
+                  document.getElementById('img-preview-a').src = dataUrl;
+                  this.showToast('Pasted screenshot into Shot A (Question)');
+                } else {
+                  this.uploadedShotB = dataUrl;
+                  document.getElementById('placeholder-box-b').classList.add('hidden');
+                  document.getElementById('preview-box-b').classList.remove('hidden');
+                  document.getElementById('img-preview-b').src = dataUrl;
+                  this.showToast('Pasted screenshot into Shot B (Solution)');
+                }
+              });
+            }
+          }
+        });
+      },
+
+      readFileAsCompressedDataURL(file, callback) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 1200;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = (h / w) * maxDim; w = maxDim; }
+              else { w = (w / h) * maxDim; h = maxDim; }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      },
+
+      updateDefaultTimerByDifficulty() {
+        const diff = document.getElementById('ingest-difficulty').value;
+        const timerInput = document.getElementById('ingest-timer');
+        if (diff === 'Easy') timerInput.value = 90;
+        else if (diff === 'Medium') timerInput.value = 180;
+        else if (diff === 'Hard') timerInput.value = 300;
+      },
+
+      saveNewQuestion(e) {
+        e.preventDefault();
+        if (!this.uploadedShotA || !this.uploadedShotB) {
+          this.showToast('Please provide both Question and Solution snapshots!', 'alert-circle');
+          return;
+        }
+
+        const newQ = {
+          id: 'q_' + Date.now(),
+          subject: document.getElementById('ingest-subject').value.trim(),
+          chapter: document.getElementById('ingest-chapter').value.trim(),
+          difficulty: document.getElementById('ingest-difficulty').value,
+          allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 180,
+          quickKey: document.getElementById('ingest-quick-key').value.trim() || 'See Solution Derivation',
+          shotA: this.uploadedShotA,
+          shotB: this.uploadedShotB,
+          attempts: { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
+          accuracy: 0,
+          history: []
+        };
+
+        this.questionBank.unshift(newQ);
+        this.saveBankToStorage(true, newQ);
+        this.showToast('Mistake saved and synced to Supabase!');
+
+        document.getElementById('ingest-form').reset();
+        this.uploadedShotA = null;
+        this.uploadedShotB = null;
+        document.getElementById('placeholder-box-a').classList.remove('hidden');
+        document.getElementById('preview-box-a').classList.add('hidden');
+        document.getElementById('placeholder-box-b').classList.remove('hidden');
+        document.getElementById('preview-box-b').classList.add('hidden');
+
+        this.switchTab('review');
+        this.launchSlotReview('morning');
+      },
+
+      saveBankToStorage(pushToCloud = false, questionToSync = null) {
+        localStorage.setItem('retain_bank_v2', JSON.stringify(this.questionBank));
+        this.updateBankCounters();
+        if (pushToCloud && questionToSync) {
+          this.syncQuestionToCloud(questionToSync);
+        }
+      },
+
+      updateBankCounters() {
+        document.getElementById('tab-bank-count').textContent = this.questionBank.length;
+        document.getElementById('stat-total-q').textContent = this.questionBank.length;
+        if (this.questionBank.length > 0) {
+          const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts.total || 0), 0);
+          const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts.correct || 0), 0);
+          const avg = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+          document.getElementById('stat-avg-accuracy').textContent = `${avg}%`;
+        }
+      },
+
+      renderBankTable() {
+        const grid = document.getElementById('bank-grid');
+        const search = document.getElementById('bank-search').value.toLowerCase();
+        const diffFilter = document.getElementById('bank-filter-diff').value;
+
+        const filtered = this.questionBank.filter(q => {
+          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search);
+          const matchDiff = diffFilter === 'ALL' || q.difficulty === diffFilter;
+          return matchSearch && matchDiff;
+        });
+
+        if (filtered.length === 0) {
+          grid.innerHTML = '<div class="col-span-full py-12 text-center text-gray-400 text-sm">No mistakes match the filter.</div>';
+          return;
+        }
+
+        grid.innerHTML = filtered.map(q => `
+          <div class="bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2">
+                <span class="font-bold text-ms-blue">${q.subject}</span>
+                <span class="px-2 py-0.5 rounded font-semibold text-[10px] ${
+                  q.difficulty === 'Hard' ? 'bg-red-100 text-red-700 dark:bg-red-950/60' :
+                  q.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60' :
+                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60'
+                }">${q.difficulty}</span>
+              </div>
+              <h4 class="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">${q.chapter}</h4>
+              <div class="text-[11px] text-gray-400 mt-1">Key: <strong>${q.quickKey || 'Full Derivation'}</strong></div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800 text-xs">
+              <span class="text-gray-500">History: <strong class="font-mono text-gray-700 dark:text-gray-300">${(q.history || []).slice(-4).join(' ') || 'None'}</strong></span>
+              <div class="flex items-center gap-1 font-bold ${q.accuracy >= 60 ? 'text-emerald-600' : 'text-amber-600'}">
+                ${q.accuracy}% acc
+              </div>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      initNotificationEngine() {
+        this.updateNotificationUI();
+        setInterval(() => this.checkDailyReviewPushes(), 60000);
+      },
+
+      updateNotificationUI() {
+        const hasPerm = ('Notification' in window) && Notification.permission === 'granted';
+        const statusInd = document.getElementById('perm-status-indicator');
+        const statusText = document.getElementById('perm-status-text');
+        const navIcon = document.getElementById('nav-notif-icon');
+        const navLabel = document.getElementById('nav-notif-label');
+
+        if (hasPerm) {
+          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+          statusText.textContent = 'System Alerts: Active on this Device';
+          navIcon.className = 'w-3.5 h-3.5 text-emerald-500';
+          navLabel.textContent = 'Alerts Active';
+        } else {
+          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+          statusText.textContent = 'System Alerts: Permission Needed';
+          navIcon.className = 'w-3.5 h-3.5 text-amber-500';
+          navLabel.textContent = 'Alerts Pending';
+        }
+        lucide.createIcons();
+      },
+
+      async requestNotificationPermission() {
+        if (!('Notification' in window)) return;
+        const perm = await Notification.requestPermission();
+        this.updateNotificationUI();
+        if (perm === 'granted') {
+          this.showToast('Push Alerts Enabled!', 'check');
+        }
+      },
+
+      testNotificationFire() {
+        if (Notification.permission !== 'granted') {
+          this.requestNotificationPermission();
+          return;
+        }
+        new Notification('☀️ Morning Review Ready (10 Questions)', {
+          body: 'Your failure-weighted review batch is ready. Tap to solve!'
+        });
+        this.showToast('Test alert dispatched!');
+      },
+
+      checkDailyReviewPushes() {
+        if (Notification.permission !== 'granted') return;
+        const now = new Date();
+        const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const todayDate = now.toISOString().split('T')[0];
+
+        const slots = [
+          { key: 'morning', time: document.getElementById('cfg-time-morning').value, title: '☀️ Morning Review Batch', body: '10 shuffled questions are queued. Maintain your streak!' },
+          { key: 'midday',  time: document.getElementById('cfg-time-midday').value,  title: '🌤️ Midday Checkpoint', body: 'Midday sprint ready. Review high-error formulas.' },
+          { key: 'evening', time: document.getElementById('cfg-time-evening').value, title: '🌙 Evening Deep Dive', body: 'Clear your mistake backlog for today!' }
+        ];
+
+        slots.forEach(slot => {
+          const flagKey = `retain_alert_fired_${todayDate}_${slot.key}`;
+          if (currentHHMM === slot.time && !localStorage.getItem(flagKey)) {
+            new Notification(slot.title, { body: slot.body });
+            localStorage.setItem(flagKey, 'true');
+          }
+        });
+      },
+
+      saveScheduleConfig() {
+        const cfg = {
+          mTime: document.getElementById('cfg-time-morning').value,
+          mQuota: document.getElementById('cfg-quota-morning').value,
+          dTime: document.getElementById('cfg-time-midday').value,
+          dQuota: document.getElementById('cfg-quota-midday').value,
+          eTime: document.getElementById('cfg-time-evening').value,
+          eQuota: document.getElementById('cfg-quota-evening').value
+        };
+        localStorage.setItem('retain_schedule_cfg', JSON.stringify(cfg));
+        this.updateQuotaBadges();
+        this.showToast('Schedule updated');
+      },
+
+      loadScheduleConfig() {
+        const cfg = JSON.parse(localStorage.getItem('retain_schedule_cfg'));
+        if (cfg) {
+          document.getElementById('cfg-time-morning').value = cfg.mTime || '08:00';
+          document.getElementById('cfg-quota-morning').value = cfg.mQuota || '10';
+          document.getElementById('cfg-time-midday').value = cfg.dTime || '14:00';
+          document.getElementById('cfg-quota-midday').value = cfg.dQuota || '10';
+          document.getElementById('cfg-time-evening').value = cfg.eTime || '20:30';
+          document.getElementById('cfg-quota-evening').value = cfg.eQuota || '20';
+        }
+        this.updateQuotaBadges();
+      },
+
+      updateQuotaBadges() {
+        document.getElementById('badge-morning-quota').textContent = `0/${document.getElementById('cfg-quota-morning').value}`;
+        document.getElementById('badge-midday-quota').textContent = `0/${document.getElementById('cfg-quota-midday').value}`;
+        document.getElementById('badge-evening-quota').textContent = `0/${document.getElementById('cfg-quota-evening').value}`;
+      },
+
+      exportDataJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.questionBank, null, 2));
+        const a = document.createElement('a');
+        a.href = dataStr;
+        a.download = `retain_mistake_bank_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        this.showToast('JSON backup exported!');
+      },
+
+      importDataJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (Array.isArray(imported)) {
+              this.questionBank = imported;
+              this.saveBankToStorage(false);
+              this.showToast(`Imported ${imported.length} questions!`);
+              this.launchSlotReview('morning');
+            }
+          } catch (err) {
+            this.showToast('Invalid JSON file.', 'alert-circle');
+          }
+        };
+        reader.readAsText(file);
+      },
+
+      zoomImage(type) {
+        const target = document.getElementById('zoom-img-target');
+        target.src = type === 'question' ? document.getElementById('review-shot-a-img').src : document.getElementById('review-shot-b-img').src;
+        document.getElementById('modal-zoom').classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      closeZoomModal() {
+        document.getElementById('modal-zoom').classList.add('hidden');
+      }
+    };
+
+    window.app = app;
+    window.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+</body>
+</html>
