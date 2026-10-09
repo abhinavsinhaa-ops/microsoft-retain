@@ -163,6 +163,7 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
+                <span id="review-qid-badge" class="font-mono text-xs font-bold text-ms-blue bg-blue-50 dark:bg-blue-950 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900">#PHY-001</span>
                 <span id="review-subject-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800">Physics</span>
                 <span id="review-chapter-badge" class="text-xs text-gray-500 dark:text-gray-400 font-medium">Rotational Dynamics</span>
                 <span id="review-difficulty-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
@@ -346,7 +347,7 @@
           </div>
           <div>
             <h2 class="text-xl font-bold">Dual-Shot Mistake Capture</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Upload paper tests and hand-written solutions. Instantly replicates to all connected devices.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Upload paper tests and hand-written solutions. Automatically generates unique Question ID.</p>
           </div>
         </div>
 
@@ -435,12 +436,12 @@
       </div>
     </section>
 
-    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK -->
+    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK WITH PREVIEWS -->
     <section id="view-bank" class="hidden space-y-6">
       
       <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Filter by chapter or subject..." class="px-3.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-64">
+          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search by ID, chapter, or subject..." class="px-3.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-72">
           <select id="bank-filter-diff" onchange="app.renderBankTable()" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
             <option value="ALL">All Difficulties</option>
             <option value="Easy">Easy</option>
@@ -455,7 +456,8 @@
         </div>
       </div>
 
-      <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Ledger Cards Grid with Visual Thumbnails & IDs -->
+      <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Rendered via JS -->
       </div>
 
@@ -617,6 +619,75 @@
 
   </main>
 
+  <!-- ================= DEDICATED QUESTION DETAIL & INSPECT MODAL ================= -->
+  <div id="modal-preview" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar border border-gray-200 dark:border-gray-700 shadow-2xl p-6 sm:p-8 space-y-6">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="prev-modal-qid" class="font-mono text-sm font-bold text-ms-blue bg-blue-50 dark:bg-blue-950 px-2.5 py-1 rounded border border-blue-200 dark:border-blue-900">#PHY-001</span>
+            <span id="prev-modal-subject" class="text-xs font-bold uppercase text-gray-500">Physics</span>
+            <span id="prev-modal-diff" class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
+          </div>
+          <h3 id="prev-modal-chapter" class="text-lg font-bold text-gray-900 dark:text-white mt-1">Rotational Dynamics</h3>
+        </div>
+        <button onclick="app.closePreviewModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Metrics Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs">
+        <div>
+          <span class="text-gray-400 block">Total Attempts</span>
+          <strong id="prev-modal-attempts" class="text-sm font-bold">3</strong>
+        </div>
+        <div>
+          <span class="text-gray-400 block">Accuracy</span>
+          <strong id="prev-modal-accuracy" class="text-sm font-bold text-emerald-600">33%</strong>
+        </div>
+        <div>
+          <span class="text-gray-400 block">Quick Answer Key</span>
+          <strong id="prev-modal-key" class="text-sm font-bold text-gray-900 dark:text-white truncate block">Option B</strong>
+        </div>
+        <div>
+          <span class="text-gray-400 block">Recent History</span>
+          <span id="prev-modal-history" class="text-sm font-mono font-bold">❌ ❌ ✅</span>
+        </div>
+      </div>
+
+      <!-- Problem & Solution Tabs in Preview -->
+      <div class="space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot A: Question Problem Statement</span>
+          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[220px]">
+            <img id="prev-modal-shot-a" src="" class="max-h-[380px] w-auto object-contain rounded">
+          </div>
+        </div>
+
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Shot B: Complete Solution & Derivation</span>
+          <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/20 p-2 flex items-center justify-center min-h-[220px]">
+            <img id="prev-modal-shot-b" src="" class="max-h-[380px] w-auto object-contain rounded">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action footer -->
+      <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
+        <button id="prev-modal-del-btn" class="px-4 py-2 rounded-lg border border-red-300 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Delete Question
+        </button>
+        <button id="prev-modal-practice-btn" class="px-5 py-2 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="play" class="w-4 h-4"></i> Practice This Question Now
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ================= IMAGE EXPAND MODAL ================= -->
   <div id="modal-zoom" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
     <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
@@ -649,6 +720,7 @@
       questionBank: JSON.parse(localStorage.getItem('retain_bank_v2')) || [
         {
           id: 'q_rotational_1',
+          displayId: '#PHY-001',
           subject: 'Physics',
           chapter: 'Rotational Dynamics',
           difficulty: 'Hard',
@@ -674,6 +746,7 @@
       uploadedShotB: null,
 
       init() {
+        this.ensureDisplayIds();
         lucide.createIcons();
         this.updateBankCounters();
         this.initNotificationEngine();
@@ -681,6 +754,19 @@
         this.loadScheduleConfig();
         this.initSupabase();
         this.launchSlotReview('morning');
+      },
+
+      // Generate clean Question IDs (#PHY-001, #NLM-002) for all questions
+      ensureDisplayIds() {
+        let changed = false;
+        this.questionBank.forEach((q, idx) => {
+          if (!q.displayId) {
+            const prefix = (q.subject || 'Q').slice(0, 3).toUpperCase();
+            q.displayId = `#${prefix}-${String(idx + 1).padStart(3, '0')}`;
+            changed = true;
+          }
+        });
+        if (changed) this.saveBankToStorage(false);
       },
 
       initSupabase() {
@@ -771,6 +857,7 @@
           const idx = this.questionBank.findIndex(q => q.id === newRow.id);
           const mapped = {
             id: newRow.id,
+            displayId: newRow.display_id || `#${(newRow.subject || 'Q').slice(0,3).toUpperCase()}-${String(this.questionBank.length + 1).padStart(3, '0')}`,
             subject: newRow.subject,
             chapter: newRow.chapter,
             difficulty: newRow.difficulty,
@@ -803,8 +890,9 @@
           .order('updated_at', { ascending: false });
 
         if (!error && data && data.length > 0) {
-          this.questionBank = data.map(q => ({
+          this.questionBank = data.map((q, idx) => ({
             id: q.id,
+            displayId: q.display_id || `#${(q.subject || 'Q').slice(0, 3).toUpperCase()}-${String(idx + 1).padStart(3, '0')}`,
             subject: q.subject,
             chapter: q.chapter,
             difficulty: q.difficulty,
@@ -828,6 +916,7 @@
         if (!this.sbClient) return;
         await this.sbClient.from('retain_questions').upsert({
           id: q.id,
+          display_id: q.displayId,
           subject: q.subject,
           chapter: q.chapter,
           difficulty: q.difficulty,
@@ -850,6 +939,7 @@
         this.setCloudStatus('syncing');
         const rows = this.questionBank.map(q => ({
           id: q.id,
+          display_id: q.displayId,
           subject: q.subject,
           chapter: q.chapter,
           difficulty: q.difficulty,
@@ -873,27 +963,23 @@
         }
       },
 
-      // ================= DELETE QUESTION ENGINE =================
+      // Delete question permanently
       async deleteQuestion(id) {
-        if (!confirm('Are you sure you want to permanently delete this question from your mistake bank and cloud?')) return;
+        if (!confirm('Are you sure you want to permanently delete this question?')) return;
         
         this.questionBank = this.questionBank.filter(q => q.id !== id);
         this.saveBankToStorage(false);
 
-        // Remove from cloud database
         if (this.sbClient) {
-          const { error } = await this.sbClient
-            .from('retain_questions')
-            .delete()
-            .eq('id', id);
+          const { error } = await this.sbClient.from('retain_questions').delete().eq('id', id);
           if (error) console.error('Cloud delete error:', error);
         }
 
+        this.closePreviewModal();
         this.renderBankTable();
         this.updateBankCounters();
         this.showToast('Question permanently deleted.');
 
-        // If the deleted question was currently active in the review queue
         if (this.currentReviewQueue && this.currentReviewQueue.some(q => q.id === id)) {
           this.currentReviewQueue = this.currentReviewQueue.filter(q => q.id !== id);
           if (this.currentReviewQueue.length === 0) {
@@ -913,6 +999,40 @@
         if (currentQ) {
           this.deleteQuestion(currentQ.id);
         }
+      },
+
+      // Dedicated Question Inspector Modal
+      openPreviewModal(id) {
+        const q = this.questionBank.find(item => item.id === id);
+        if (!q) return;
+
+        document.getElementById('prev-modal-qid').textContent = q.displayId || `#${q.id.slice(-4)}`;
+        document.getElementById('prev-modal-subject').textContent = q.subject;
+        document.getElementById('prev-modal-chapter').textContent = q.chapter;
+        document.getElementById('prev-modal-diff').textContent = q.difficulty;
+        document.getElementById('prev-modal-attempts').textContent = q.attempts.total || 0;
+        document.getElementById('prev-modal-accuracy').textContent = `${q.accuracy || 0}%`;
+        document.getElementById('prev-modal-key').textContent = q.quickKey || 'Full derivation in Shot B';
+        document.getElementById('prev-modal-history').textContent = (q.history && q.history.length > 0) ? q.history.slice(-4).join(' ') : 'None';
+        
+        document.getElementById('prev-modal-shot-a').src = q.shotA;
+        document.getElementById('prev-modal-shot-b').src = q.shotB;
+
+        document.getElementById('prev-modal-del-btn').onclick = () => this.deleteQuestion(q.id);
+        document.getElementById('prev-modal-practice-btn').onclick = () => {
+          this.closePreviewModal();
+          this.currentReviewQueue = [q];
+          this.currentCardIndex = 0;
+          this.switchTab('review');
+          this.renderCurrentCard();
+        };
+
+        document.getElementById('modal-preview').classList.remove('hidden');
+        lucide.createIcons();
+      },
+
+      closePreviewModal() {
+        document.getElementById('modal-preview').classList.add('hidden');
       },
 
       switchTab(tabId) {
@@ -997,6 +1117,7 @@
         document.getElementById('hint-container').classList.add('hidden');
         document.getElementById('action-bar-solving').classList.remove('hidden');
 
+        document.getElementById('review-qid-badge').textContent = q.displayId || `#${q.id.slice(-4)}`;
         document.getElementById('review-subject-badge').textContent = q.subject;
         document.getElementById('review-chapter-badge').textContent = q.chapter;
         document.getElementById('review-difficulty-badge').textContent = q.difficulty;
@@ -1241,9 +1362,14 @@
           return;
         }
 
+        const subj = document.getElementById('ingest-subject').value.trim();
+        const prefix = (subj || 'Q').slice(0, 3).toUpperCase();
+        const displayId = `#${prefix}-${String(this.questionBank.length + 1).padStart(3, '0')}`;
+
         const newQ = {
           id: 'q_' + Date.now(),
-          subject: document.getElementById('ingest-subject').value.trim(),
+          displayId: displayId,
+          subject: subj,
           chapter: document.getElementById('ingest-chapter').value.trim(),
           difficulty: document.getElementById('ingest-difficulty').value,
           allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 180,
@@ -1257,7 +1383,7 @@
 
         this.questionBank.unshift(newQ);
         this.saveBankToStorage(true, newQ);
-        this.showToast('Mistake saved and synced to Supabase!');
+        this.showToast(`Mistake ${displayId} saved and synced!`);
 
         document.getElementById('ingest-form').reset();
         this.uploadedShotA = null;
@@ -1267,8 +1393,7 @@
         document.getElementById('placeholder-box-b').classList.remove('hidden');
         document.getElementById('preview-box-b').classList.add('hidden');
 
-        this.switchTab('review');
-        this.launchSlotReview('morning');
+        this.switchTab('bank');
       },
 
       saveBankToStorage(pushToCloud = false, questionToSync = null) {
@@ -1290,13 +1415,15 @@
         }
       },
 
+      // Render Ledger with Visual Question Thumbnails & IDs
       renderBankTable() {
         const grid = document.getElementById('bank-grid');
         const search = document.getElementById('bank-search').value.toLowerCase();
         const diffFilter = document.getElementById('bank-filter-diff').value;
 
         const filtered = this.questionBank.filter(q => {
-          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search);
+          const qid = (q.displayId || '').toLowerCase();
+          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search) || qid.includes(search);
           const matchDiff = diffFilter === 'ALL' || q.difficulty === diffFilter;
           return matchSearch && matchDiff;
         });
@@ -1307,29 +1434,51 @@
         }
 
         grid.innerHTML = filtered.map(q => `
-          <div class="bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div>
-              <div class="flex items-center justify-between text-xs mb-2">
-                <span class="font-bold text-ms-blue">${q.subject}</span>
-                <span class="px-2 py-0.5 rounded font-semibold text-[10px] ${
+          <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
+            
+            <!-- Top Image Thumbnail Preview -->
+            <div onclick="app.openPreviewModal('${q.id}')" class="relative bg-gray-50 dark:bg-black/30 h-40 border-b border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer flex items-center justify-center group-hover:opacity-95 transition">
+              <img src="${q.shotA}" class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-200" alt="Question Preview">
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+                <i data-lucide="eye" class="w-4 h-4"></i> Inspect Question
+              </div>
+              <span class="absolute top-2 left-2 font-mono text-[11px] font-bold text-ms-blue bg-white/90 dark:bg-gray-900/90 px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-900">
+                ${q.displayId || '#Q'}
+              </span>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-ms-blue uppercase tracking-wider text-[11px]">${q.subject}</span>
+                <span class="px-2 py-0.5 rounded font-bold text-[10px] ${
                   q.difficulty === 'Hard' ? 'bg-red-100 text-red-700 dark:bg-red-950/60' :
                   q.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60' :
                   'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60'
                 }">${q.difficulty}</span>
               </div>
+              
               <h4 class="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">${q.chapter}</h4>
-              <div class="text-[11px] text-gray-400 mt-1">Key: <strong>${q.quickKey || 'Full Derivation'}</strong></div>
+              <div class="text-[11px] text-gray-400 truncate">Key: <strong class="text-gray-700 dark:text-gray-300 font-mono">${q.quickKey || 'Full Derivation'}</strong></div>
             </div>
 
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800 text-xs">
-              <span class="text-gray-500">History: <strong class="font-mono text-gray-700 dark:text-gray-300">${(q.history || []).slice(-4).join(' ') || 'None'}</strong></span>
+            <!-- Card Footer -->
+            <div class="px-4 py-3 bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400 text-[11px]">History:</span>
+                <span class="font-mono text-gray-700 dark:text-gray-300">${(q.history || []).slice(-4).join(' ') || 'Fresh'}</span>
+              </div>
               <div class="flex items-center gap-2">
                 <span class="font-bold ${q.accuracy >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${q.accuracy}% acc</span>
-                <button onclick="app.deleteQuestion('${q.id}')" title="Delete Question" class="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <button onclick="app.openPreviewModal('${q.id}')" title="Inspect" class="p-1.5 rounded text-gray-400 hover:text-ms-blue hover:bg-white dark:hover:bg-gray-700 transition">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="app.deleteQuestion('${q.id}')" title="Delete" class="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-gray-700 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
+
           </div>
         `).join('');
         lucide.createIcons();
@@ -1455,6 +1604,7 @@
             const imported = JSON.parse(ev.target.result);
             if (Array.isArray(imported)) {
               this.questionBank = imported;
+              this.ensureDisplayIds();
               this.saveBankToStorage(false);
               this.showToast(`Imported ${imported.length} questions!`);
               this.launchSlotReview('morning');
