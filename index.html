@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Microsoft Retain — Mistake Mastery Engine</title>
+  <title>Salvage — Mistake Mastery Engine</title>
   
   <!-- Apple Web App & PWA Meta for iPad / iOS Home Screen -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Retain">
+  <meta name="apple-mobile-web-app-title" content="Salvage">
   <meta name="theme-color" content="#0078D4">
   
   <!-- Tailwind CSS & Lucide Icons -->
@@ -83,22 +83,18 @@
 </head>
 <body class="bg-[#F8F9FA] dark:bg-[#121212] text-[#242424] dark:text-[#E1DFDD] font-segoe min-h-screen flex flex-col transition-colors duration-200">
 
-  <!-- ================= TOP FLUENT NAVIGATION BAR ================= -->
+  <!-- ================= TOP NAVIGATION BAR ================= -->
   <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#1E1E1E]/80 border-b border-gray-200 dark:border-gray-800 acrylic">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       
       <!-- Brand & Cloud Status -->
       <div class="flex items-center gap-3">
-        <div class="grid grid-cols-2 gap-0.5 w-6 h-6">
-          <div class="bg-[#F25022]"></div>
-          <div class="bg-[#7FBA00]"></div>
-          <div class="bg-[#00A4EF]"></div>
-          <div class="bg-[#FFB900]"></div>
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-ms-blue to-cyan-500 flex items-center justify-center text-white shadow-md shadow-ms-blue/20">
+          <i data-lucide="crosshair" class="w-4 h-4"></i>
         </div>
         <div>
-          <span class="font-semibold text-lg tracking-tight flex items-center gap-1.5">
-            Microsoft <span class="text-ms-blue font-bold">Retain</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-ms-light text-ms-blue dark:bg-ms-dark/50">PCB</span>
+          <span class="font-bold text-lg tracking-tight flex items-center gap-1.5 text-gray-900 dark:text-white">
+            Salvage <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-ms-light text-ms-blue dark:bg-ms-dark/50">PCB</span>
           </span>
         </div>
         
@@ -184,7 +180,7 @@
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Review queue staged from failure-weighted mistake ledger.</p>
         </div>
 
-        <!-- IDEA 1: Pre-Flight Queue Metadata Breakdown -->
+        <!-- Pre-Flight Queue Metadata Breakdown -->
         <div class="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs">
           <div>
             <span class="text-gray-400 block text-[11px]">Batch Size</span>
@@ -200,7 +196,7 @@
           </div>
         </div>
 
-        <!-- IDEA 1: Subject Composition Chips -->
+        <!-- Subject Composition Chips -->
         <div class="space-y-1.5">
           <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">Queue Subject Composition</span>
           <div id="staging-subject-chips" class="flex items-center justify-center gap-1.5 flex-wrap text-xs">
@@ -208,7 +204,7 @@
           </div>
         </div>
 
-        <!-- IDEA 3: Pacing Intensity Selector -->
+        <!-- Pacing Intensity Selector -->
         <div class="space-y-2 text-left pt-2 border-t border-gray-100 dark:border-gray-800">
           <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block text-center">Select Session Pacing Mode</span>
           <div class="grid grid-cols-3 gap-2">
@@ -227,14 +223,12 @@
           </div>
         </div>
 
-        <!-- IDEA 2 & 4: Exam Lockdown & Scratch Sheet Checklist -->
+        <!-- Exam Lockdown & Scratch Sheet Checklist -->
         <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 text-left space-y-2 text-xs">
-          <!-- Idea 4: Scratch Sheet Discipline -->
           <label class="flex items-center gap-2.5 cursor-pointer text-gray-700 dark:text-gray-300 select-none font-medium">
             <input type="checkbox" id="chk-scratch-ready" checked class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
-            <span>Rough scratch sheet & pen ready (no textbook / notes)</span>
+            <span>Rough scratch sheet & pen ready (no notes / book)</span>
           </label>
-          <!-- Idea 2: Auto-Fullscreen Exam Lockdown -->
           <label class="flex items-center gap-2.5 cursor-pointer text-gray-700 dark:text-gray-300 select-none font-medium">
             <input type="checkbox" id="chk-exam-lockdown" class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
             <span>Exam Lockdown (Auto-enter Fullscreen on start)</span>
@@ -266,6 +260,12 @@
                 <span id="review-subject-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">Physics</span>
                 <span id="review-chapter-badge" class="text-xs text-gray-600 dark:text-gray-300 font-medium">Rotational Dynamics</span>
                 <span id="review-difficulty-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
+                
+                <!-- 3.1 CHRONIC BLINDSPOT BADGE -->
+                <span id="review-chronic-badge" class="hidden px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300 border border-red-300 dark:border-red-800 animate-pulse flex items-center gap-1">
+                  🚨 Chronic Blindspot (3x+ Failed)
+                </span>
+
                 <span id="review-errortag-badge" class="hidden px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Calc Slip</span>
                 <span id="review-testtag-badge" class="hidden px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">#Mock</span>
               </div>
@@ -635,6 +635,12 @@
             <button onclick="app.setBankFilter('Botany')" id="filter-chip-Botany" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-emerald-50 transition">🌿 Botany</button>
             <button onclick="app.setBankFilter('Zoology')" id="filter-chip-Zoology" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-rose-50 transition">🧬 Zoology</button>
             <button onclick="app.setBankFilter('STARRED')" id="filter-chip-STARRED" class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition">★ Starred</button>
+            
+            <!-- 3.1 CHRONIC BLINDSPOT FILTER -->
+            <button onclick="app.setBankFilter('CHRONIC')" id="filter-chip-CHRONIC" class="px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 hover:bg-red-100 transition">
+              🚨 Chronic (<span id="stat-chronic-count">0</span>)
+            </button>
+
             <button onclick="app.setBankFilter('GRADUATED')" id="filter-chip-GRADUATED" class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition">🎓 Mastered</button>
           </div>
         </div>
@@ -704,7 +710,7 @@
 
       </div>
 
-      <!-- 3 Daily Review Slots & Quota Management -->
+      <!-- Restored 3 Daily Review Slots & Schedule Management -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
         <div>
           <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Schedule</h3>
@@ -823,6 +829,8 @@
           <div class="flex items-center gap-2 flex-wrap">
             <span id="prev-modal-qid" class="font-mono text-sm font-bold text-ms-blue bg-blue-50 dark:bg-blue-950 px-2.5 py-1 rounded border border-blue-200 dark:border-blue-900">#PHY-001</span>
             <span id="prev-modal-subject" class="text-xs font-bold uppercase text-gray-500">Physics</span>
+            
+            <span id="prev-modal-chronic-badge" class="hidden text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-300">🚨 Chronic Blindspot</span>
             <span id="prev-modal-grad-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">🎓 Mastered</span>
             <span id="prev-modal-star-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800">★ High-Yield</span>
             <span id="prev-modal-test-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-800">#Mock</span>
@@ -973,6 +981,12 @@
         if (changed) this.saveBankToStorage(false);
       },
 
+      // 3.1 CHRONIC BLINDSPOT DETECTOR
+      isChronicBlindspot(q) {
+        const fails = (q.attempts?.incorrect || 0) + (q.attempts?.gaveUp || 0);
+        return fails >= 3 && !q.graduated;
+      },
+
       initSupabase() {
         const url = localStorage.getItem('retain_sb_url') || DEFAULT_SB_URL;
         const key = localStorage.getItem('retain_sb_key') || DEFAULT_SB_KEY;
@@ -1117,7 +1131,7 @@
             allocatedTime: q.allocated_time,
             quickKey: q.quick_key,
             shotA: q.shot_a,
-            shotB: q.shot_b,
+            shotB: q.shotB,
             attempts: q.attempts || { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
             accuracy: q.accuracy || 0,
             history: q.history || [],
@@ -1256,7 +1270,6 @@
         });
       },
 
-      // Pacing Intensity Selector (Idea 3)
       setPacingIntensity(mode) {
         this.selectedPacing = mode;
         document.querySelectorAll('.pace-pill').forEach(btn => {
@@ -1268,7 +1281,6 @@
           activeBtn.className = 'pace-pill p-2.5 rounded-xl border border-ms-blue bg-blue-50 dark:bg-blue-950/60 text-ms-blue font-bold text-xs text-center transition shadow-sm';
         }
 
-        // Recalculate estimated session time in lobby
         this.updateStagingEstTime();
       },
 
@@ -1369,7 +1381,6 @@
         if (currentQ) this.deleteQuestion(currentQ.id);
       },
 
-      // Session Staging Launcher (Prepares queue & shows Staging Lobby)
       launchSlotReview(slot) {
         this.currentSlot = slot;
         const quotaMap = {
@@ -1431,8 +1442,6 @@
         this.currentReviewQueue = shuffled;
         this.currentCardIndex = 0;
         this.switchTab('review');
-
-        // Present Staging Lobby (No timer starts yet!)
         this.showStagingLobby(slot);
       },
 
@@ -1448,7 +1457,6 @@
         this.showStagingLobby('starred');
       },
 
-      // Renders Lobby Card with Ideas 1, 2, 3, 4
       showStagingLobby(slot) {
         clearInterval(this.timerInterval);
         document.getElementById('review-active-panel')?.classList.add('hidden');
@@ -1461,7 +1469,8 @@
           morning: '☀️ Morning Review Batch',
           midday: '🌤️ Midday Sprint',
           evening: '🌙 Evening Deep Dive',
-          starred: '★ High-Yield Starred Sprint'
+          starred: '★ High-Yield Starred Sprint',
+          custom: '🎯 Targeted Problem Review'
         };
         const titleElem = document.getElementById('staging-slot-title');
         if (titleElem) titleElem.textContent = titles[slot] || 'Practice Session';
@@ -1473,7 +1482,6 @@
         const starElem = document.getElementById('staging-starred-count');
         if (starElem) starElem.textContent = `${starCount} ★`;
 
-        // Render queue subject composition chips (Idea 1)
         const subCounts = {};
         this.currentReviewQueue.forEach(q => {
           subCounts[q.subject] = (subCounts[q.subject] || 0) + 1;
@@ -1489,20 +1497,16 @@
           `).join('');
         }
 
-        // Set default pacing intensity & estimated time
         this.setPacingIntensity('standard');
         lucide.createIcons();
       },
 
-      // START BUTTON TRIGGER (Leaves Lobby, Enters Practice)
       startActiveReviewSession() {
-        // Idea 2: Fullscreen Lockdown Trigger
         const isLockdown = document.getElementById('chk-exam-lockdown')?.checked;
         if (isLockdown && document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen().catch(() => {});
         }
 
-        // Hide staging lobby, unhide solving panel, begin card #1
         document.getElementById('review-staging-panel')?.classList.add('hidden');
         document.getElementById('review-active-panel')?.classList.remove('hidden');
         this.renderCurrentCard();
@@ -1536,6 +1540,16 @@
 
         const diffBadge = document.getElementById('review-difficulty-badge');
         if (diffBadge) diffBadge.textContent = q.difficulty || 'Medium';
+
+        // 3.1 CHRONIC BLINDSPOT BADGE RENDER
+        const chronicBadge = document.getElementById('review-chronic-badge');
+        if (chronicBadge) {
+          if (this.isChronicBlindspot(q)) {
+            chronicBadge.classList.remove('hidden');
+          } else {
+            chronicBadge.classList.add('hidden');
+          }
+        }
 
         const errBadge = document.getElementById('review-errortag-badge');
         if (errBadge) {
@@ -1582,7 +1596,6 @@
 
         this.updateCurrentStarBtnUI(q.is_starred);
         
-        // Timer duration calculation based on selected lobby pacing (Idea 3)
         let duration = q.allocatedTime || 120;
         if (this.selectedPacing === 'flash' || this.isFlashMode) duration = 15;
         else if (this.selectedPacing === 'blitz') duration = Math.max(20, Math.round(duration * 0.7));
@@ -1595,7 +1608,7 @@
         clearInterval(this.timerInterval);
         this.timeRemaining = seconds;
         this.timeElapsed = 0;
-        this.isOvertime = false;
+        isOvertime = false;
 
         const display = document.getElementById('timer-display');
         const fill = document.getElementById('timer-progress-fill');
@@ -1957,6 +1970,7 @@
         const activeCount = this.questionBank.filter(q => !q.graduated).length;
         const gradCount = this.questionBank.filter(q => q.graduated).length;
         const starCount = this.questionBank.filter(q => q.is_starred).length;
+        const chronicCount = this.questionBank.filter(q => this.isChronicBlindspot(q)).length;
 
         const tabCount = document.getElementById('tab-bank-count');
         if (tabCount) tabCount.textContent = this.questionBank.length;
@@ -1969,6 +1983,9 @@
 
         const starElem = document.getElementById('badge-starred-count');
         if (starElem) starElem.textContent = starCount;
+
+        const chronicElem = document.getElementById('stat-chronic-count');
+        if (chronicElem) chronicElem.textContent = chronicCount;
 
         const marksSalvaged = gradCount * 5;
         const marksElem = document.getElementById('stat-marks-salvaged');
@@ -2037,6 +2054,7 @@
           let matchFilter = true;
           if (f === 'STARRED') matchFilter = q.is_starred === true;
           else if (f === 'GRADUATED') matchFilter = q.graduated === true;
+          else if (f === 'CHRONIC') matchFilter = this.isChronicBlindspot(q);
           else if (f !== 'ALL') matchFilter = q.subject === f;
 
           return matchSearch && matchFilter;
@@ -2054,8 +2072,10 @@
           Zoology: 'text-rose-600 bg-rose-50 dark:bg-rose-950/60'
         };
 
-        grid.innerHTML = filtered.map(q => `
-          <div class="print-card bg-white dark:bg-[#1E1E1E] rounded-2xl border ${q.is_starred ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-gray-200 dark:border-gray-800'} shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
+        grid.innerHTML = filtered.map(q => {
+          const isChronic = this.isChronicBlindspot(q);
+          return `
+          <div class="print-card bg-white dark:bg-[#1E1E1E] rounded-2xl border ${isChronic ? 'border-red-400 dark:border-red-600 shadow-red-500/10' : (q.is_starred ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-gray-200 dark:border-gray-800')} shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
             
             <div onclick="app.openPreviewModal('${q.id}')" class="relative bg-gray-50 dark:bg-black/30 h-36 border-b border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer flex items-center justify-center">
               <img src="${q.shotA}" class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-200" alt="Preview">
@@ -2065,7 +2085,7 @@
               <span class="absolute top-2 left-2 font-mono text-[10px] font-bold text-ms-blue bg-white/95 dark:bg-gray-900/95 px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-900">
                 ${q.displayId || '#Q'}
               </span>
-              ${q.graduated ? '<span class="absolute top-2 right-2 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm">🎓 Mastered</span>' : ''}
+              ${isChronic ? '<span class="absolute top-2 right-2 text-[10px] font-bold bg-red-100 text-red-800 px-2 py-0.5 rounded shadow-sm border border-red-200">🚨 Chronic</span>' : (q.graduated ? '<span class="absolute top-2 right-2 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm">🎓 Mastered</span>' : '')}
               ${q.test_source ? `<span class="absolute bottom-2 right-2 text-[10px] font-bold bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded shadow-sm">\${q.test_source}</span>` : ''}
             </div>
 
@@ -2092,7 +2112,7 @@
             </div>
 
           </div>
-        `).join('');
+        `}).join('');
         lucide.createIcons();
       },
 
@@ -2120,6 +2140,12 @@
 
         const tag = document.getElementById('prev-modal-errortag');
         if (tag) tag.textContent = q.error_tag || 'None';
+
+        const chronicBadge = document.getElementById('prev-modal-chronic-badge');
+        if (chronicBadge) {
+          if (this.isChronicBlindspot(q)) chronicBadge.classList.remove('hidden');
+          else chronicBadge.classList.add('hidden');
+        }
 
         const gradBadge = document.getElementById('prev-modal-grad-badge');
         if (gradBadge) {
@@ -2285,7 +2311,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.questionBank, null, 2));
         const a = document.createElement('a');
         a.href = dataStr;
-        a.download = `retain_mistake_bank_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `salvage_mistake_bank_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         a.remove();
