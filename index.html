@@ -354,7 +354,7 @@
 
     </section>
 
-    <!-- VIEW 2: DUAL-SHOT INGESTION (WITH POST-MOCK BULK RAPID INGESTION) -->
+    <!-- VIEW 2: DUAL-SHOT INGESTION (WITH CONTINUOUS BULK RAPID INGESTION) -->
     <section id="view-ingest" class="hidden max-w-3xl mx-auto space-y-6">
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800">
         
@@ -369,7 +369,7 @@
             </div>
           </div>
           
-          <!-- CONTINUOUS RAPID INGESTION TOGGLE (POST-MOCK BULK MODE) -->
+          <!-- CONTINUOUS RAPID INGESTION TOGGLE -->
           <div class="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800/80 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
             <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-300 select-none">
               <input type="checkbox" id="ingest-bulk-mode" onchange="app.toggleBulkModeUI()" class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
@@ -381,7 +381,7 @@
 
         <form id="ingest-form" onsubmit="app.saveNewQuestion(event)" class="mt-6 space-y-5">
           
-          <!-- 1-TAP SUBJECT SELECTOR (Auto-tunes NEET Pacing Timers) -->
+          <!-- 1-TAP SUBJECT SELECTOR -->
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Select Subject *</label>
             <input type="hidden" id="ingest-subject" value="Physics">
@@ -562,8 +562,9 @@
             <i data-lucide="printer" class="w-3.5 h-3.5 text-ms-blue"></i>
             <span>Print Test Sheet</span>
           </button>
-          <div class="text-xs font-medium text-gray-500">
+          <div class="text-xs font-medium text-gray-500 flex items-center gap-3">
             <span>Active: <strong id="stat-active-q" class="text-gray-900 dark:text-white">0</strong></span>
+            <span>Mastery: <strong id="stat-avg-accuracy" class="text-emerald-600 font-bold">0%</strong></span>
           </div>
         </div>
       </div>
@@ -893,8 +894,10 @@
         const url = localStorage.getItem('retain_sb_url') || DEFAULT_SB_URL;
         const key = localStorage.getItem('retain_sb_key') || DEFAULT_SB_KEY;
 
-        document.getElementById('sb-url-input').value = url;
-        document.getElementById('sb-key-input').value = key;
+        const urlInput = document.getElementById('sb-url-input');
+        const keyInput = document.getElementById('sb-key-input');
+        if (urlInput) urlInput.value = url;
+        if (keyInput) keyInput.value = key;
 
         if (!window.supabase) {
           this.setCloudStatus('local');
@@ -930,22 +933,30 @@
         const dot = document.getElementById('cloud-status-dot');
         const text = document.getElementById('cloud-status-text');
 
+        if (!dot || !text) return;
+
         if (status === 'connected') {
-          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
-          badge.textContent = 'Realtime Active';
+          if (badge) {
+            badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+            badge.textContent = 'Realtime Active';
+          }
           dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
           text.textContent = 'Realtime Synced';
         } else if (status === 'syncing') {
           dot.className = 'w-2 h-2 rounded-full bg-blue-500 animate-spin';
           text.textContent = 'Syncing...';
         } else if (status === 'error') {
-          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300';
-          badge.textContent = 'Error';
+          if (badge) {
+            badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300';
+            badge.textContent = 'Error';
+          }
           dot.className = 'w-2 h-2 rounded-full bg-red-500';
           text.textContent = 'Sync Failed';
         } else {
-          badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
-          badge.textContent = 'Disconnected';
+          if (badge) {
+            badge.className = 'px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
+            badge.textContent = 'Disconnected';
+          }
           dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
           text.textContent = 'Local Only';
         }
@@ -1043,26 +1054,30 @@
 
       async syncQuestionToCloud(q) {
         if (!this.sbClient) return;
-        await this.sbClient.from('retain_questions').upsert({
-          id: q.id,
-          display_id: q.displayId,
-          subject: q.subject,
-          chapter: q.chapter,
-          difficulty: q.difficulty,
-          allocated_time: q.allocatedTime,
-          quick_key: q.quickKey,
-          shot_a: q.shotA,
-          shot_b: q.shotB,
-          attempts: q.attempts,
-          accuracy: q.accuracy,
-          history: q.history,
-          is_starred: q.is_starred || false,
-          graduated: q.graduated || false,
-          error_tag: q.error_tag || '',
-          test_source: q.test_source || '',
-          last_failed_at: q.last_failed_at || 0,
-          updated_at: new Date().toISOString()
-        });
+        try {
+          await this.sbClient.from('retain_questions').upsert({
+            id: q.id,
+            display_id: q.displayId,
+            subject: q.subject,
+            chapter: q.chapter,
+            difficulty: q.difficulty,
+            allocated_time: q.allocatedTime,
+            quick_key: q.quickKey,
+            shot_a: q.shotA,
+            shot_b: q.shotB,
+            attempts: q.attempts,
+            accuracy: q.accuracy,
+            history: q.history,
+            is_starred: q.is_starred || false,
+            graduated: q.graduated || false,
+            error_tag: q.error_tag || '',
+            test_source: q.test_source || '',
+            last_failed_at: q.last_failed_at || 0,
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Cloud sync error:', e);
+        }
       },
 
       async pushAllLocalToCloud() {
@@ -1103,7 +1118,8 @@
       },
 
       selectSubject(subj) {
-        document.getElementById('ingest-subject').value = subj;
+        const subInput = document.getElementById('ingest-subject');
+        if (subInput) subInput.value = subj;
         document.querySelectorAll('.sub-pill').forEach(btn => {
           btn.className = 'sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs transition';
         });
@@ -1115,18 +1131,24 @@
           Botany: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold',
           Zoology: 'border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold'
         };
-        activeBtn.className = `sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border ${colors[subj]} text-xs transition shadow-sm`;
+        if (activeBtn) activeBtn.className = `sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border ${colors[subj]} text-xs transition shadow-sm`;
 
         const timerInput = document.getElementById('ingest-timer');
-        if (subj === 'Botany' || subj === 'Zoology') timerInput.value = 45;
-        else if (subj === 'Chemistry') timerInput.value = 60;
-        else if (subj === 'Physics') timerInput.value = 120;
+        if (timerInput) {
+          if (subj === 'Botany' || subj === 'Zoology') timerInput.value = 45;
+          else if (subj === 'Chemistry') timerInput.value = 60;
+          else if (subj === 'Physics') timerInput.value = 120;
+        }
       },
 
       updateDefaultTimerByDifficulty() {
-        const diff = document.getElementById('ingest-difficulty').value;
-        const subj = document.getElementById('ingest-subject').value;
+        const diffElem = document.getElementById('ingest-difficulty');
+        const subjElem = document.getElementById('ingest-subject');
         const timerInput = document.getElementById('ingest-timer');
+        if (!diffElem || !subjElem || !timerInput) return;
+
+        const diff = diffElem.value;
+        const subj = subjElem.value;
         
         let base = 60;
         if (subj === 'Botany' || subj === 'Zoology') base = 45;
@@ -1140,6 +1162,7 @@
 
       selectErrorTag(tag) {
         const input = document.getElementById('ingest-error-tag');
+        if (!input) return;
         input.value = (input.value === tag) ? '' : tag;
         document.querySelectorAll('.err-chip').forEach(btn => {
           if (btn.textContent.includes(tag) && input.value === tag) {
@@ -1155,13 +1178,13 @@
         const btn = document.getElementById('flash-mode-btn');
         const label = document.getElementById('flash-mode-label');
         if (this.isFlashMode) {
-          btn.className = 'px-2.5 py-1.5 rounded-lg border border-amber-400 bg-amber-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition';
-          label.textContent = 'Flash: ON (15s)';
+          if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg border border-amber-400 bg-amber-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition';
+          if (label) label.textContent = 'Flash: ON (15s)';
           this.showToast('⚡ Flash Mode ON: 15s mental recall drill!');
           if (this.currentReviewQueue.length > 0) this.startCardTimer(15);
         } else {
-          btn.className = 'px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-bold flex items-center gap-1 transition';
-          label.textContent = 'Flash: Off';
+          if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-bold flex items-center gap-1 transition';
+          if (label) label.textContent = 'Flash: Off';
           this.showToast('Standard solve timer restored.');
           if (this.currentReviewQueue.length > 0) {
             const q = this.currentReviewQueue[this.currentCardIndex];
@@ -1192,6 +1215,7 @@
 
       updateCurrentStarBtnUI(isStarred) {
         const starBtn = document.getElementById('review-star-btn');
+        if (!starBtn) return;
         if (isStarred) {
           starBtn.className = 'p-2 text-amber-500 fill-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition';
           starBtn.innerHTML = '<i data-lucide="star" class="w-5 h-5 fill-amber-500"></i>';
@@ -1236,9 +1260,9 @@
       launchSlotReview(slot) {
         this.currentSlot = slot;
         const quotaMap = {
-          morning: parseInt(document.getElementById('cfg-quota-morning').value) || 10,
-          midday: parseInt(document.getElementById('cfg-quota-midday').value) || 10,
-          evening: parseInt(document.getElementById('cfg-quota-evening').value) || 20
+          morning: parseInt(document.getElementById('cfg-quota-morning')?.value) || 10,
+          midday: parseInt(document.getElementById('cfg-quota-midday')?.value) || 10,
+          evening: parseInt(document.getElementById('cfg-quota-evening')?.value) || 20
         };
         const quota = quotaMap[slot] || 10;
 
@@ -1266,8 +1290,8 @@
           this.showToast(`🔒 ${lockedCount} cards in 12h cooling lockout for retention.`);
         }
 
-        document.getElementById('review-active-panel').classList.remove('hidden');
-        document.getElementById('review-complete-panel').classList.add('hidden');
+        document.getElementById('review-active-panel')?.classList.remove('hidden');
+        document.getElementById('review-complete-panel')?.classList.add('hidden');
 
         const weightedPool = poolToUse.map(q => {
           const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
@@ -1308,8 +1332,8 @@
         }
         this.currentReviewQueue = [...starred];
         this.currentCardIndex = 0;
-        document.getElementById('review-active-panel').classList.remove('hidden');
-        document.getElementById('review-complete-panel').classList.add('hidden');
+        document.getElementById('review-active-panel')?.classList.remove('hidden');
+        document.getElementById('review-complete-panel')?.classList.add('hidden');
         this.switchTab('review');
         this.renderCurrentCard();
         this.showToast(`Loaded ${starred.length} High-Yield Starred Questions!`);
@@ -1319,52 +1343,73 @@
         if (this.currentReviewQueue.length === 0) return;
         const q = this.currentReviewQueue[this.currentCardIndex];
 
-        document.getElementById('verification-panel').classList.add('hidden');
-        document.getElementById('hint-container').classList.add('hidden');
-        document.getElementById('action-bar-solving').classList.remove('hidden');
+        document.getElementById('verification-panel')?.classList.add('hidden');
+        document.getElementById('hint-container')?.classList.add('hidden');
+        document.getElementById('action-bar-solving')?.classList.remove('hidden');
 
-        document.getElementById('review-qid-badge').textContent = q.displayId || `#${q.id.slice(-4)}`;
+        const qidBadge = document.getElementById('review-qid-badge');
+        if (qidBadge) qidBadge.textContent = q.displayId || `#${q.id.slice(-4)}`;
         
         const subjBadge = document.getElementById('review-subject-badge');
-        subjBadge.textContent = q.subject;
-        const subColors = {
-          Physics: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-          Chemistry: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-          Botany: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-          Zoology: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-        };
-        subjBadge.className = `px-2 py-0.5 rounded text-xs font-bold ${subColors[q.subject] || 'bg-gray-100 text-gray-800'}`;
+        if (subjBadge) {
+          subjBadge.textContent = q.subject;
+          const subColors = {
+            Physics: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+            Chemistry: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+            Botany: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+            Zoology: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+          };
+          subjBadge.className = `px-2 py-0.5 rounded text-xs font-bold ${subColors[q.subject] || 'bg-gray-100 text-gray-800'}`;
+        }
 
-        document.getElementById('review-chapter-badge').textContent = q.chapter;
-        document.getElementById('review-difficulty-badge').textContent = q.difficulty || 'Medium';
+        const chapterBadge = document.getElementById('review-chapter-badge');
+        if (chapterBadge) chapterBadge.textContent = q.chapter;
+
+        const diffBadge = document.getElementById('review-difficulty-badge');
+        if (diffBadge) diffBadge.textContent = q.difficulty || 'Medium';
 
         const errBadge = document.getElementById('review-errortag-badge');
-        if (q.error_tag) {
-          errBadge.textContent = q.error_tag;
-          errBadge.classList.remove('hidden');
-        } else {
-          errBadge.classList.add('hidden');
+        if (errBadge) {
+          if (q.error_tag) {
+            errBadge.textContent = q.error_tag;
+            errBadge.classList.remove('hidden');
+          } else {
+            errBadge.classList.add('hidden');
+          }
         }
 
         const testBadge = document.getElementById('review-testtag-badge');
-        if (q.test_source) {
-          testBadge.textContent = q.test_source;
-          testBadge.classList.remove('hidden');
-        } else {
-          testBadge.classList.add('hidden');
+        if (testBadge) {
+          if (q.test_source) {
+            testBadge.textContent = q.test_source;
+            testBadge.classList.remove('hidden');
+          } else {
+            testBadge.classList.add('hidden');
+          }
         }
 
-        document.getElementById('review-current-index').textContent = this.currentCardIndex + 1;
-        document.getElementById('review-total-count').textContent = this.currentReviewQueue.length;
+        const curIdxElem = document.getElementById('review-current-index');
+        if (curIdxElem) curIdxElem.textContent = this.currentCardIndex + 1;
+
+        const totalElem = document.getElementById('review-total-count');
+        if (totalElem) totalElem.textContent = this.currentReviewQueue.length;
         
         const recentHistory = (q.history || []).slice(-3);
         const streakCount = recentHistory.filter(h => h === '✅').length;
-        document.getElementById('review-streak-dots').textContent = `${streakCount}/3 ✅`;
-        document.getElementById('review-card-accuracy').textContent = `${q.accuracy || 0}%`;
+        const streakElem = document.getElementById('review-streak-dots');
+        if (streakElem) streakElem.textContent = `${streakCount}/3 ✅`;
 
-        document.getElementById('review-shot-a-img').src = q.shotA;
-        document.getElementById('review-shot-b-img').src = q.shotB;
-        document.getElementById('review-quick-key').textContent = q.quickKey || 'Full working in Shot B';
+        const accElem = document.getElementById('review-card-accuracy');
+        if (accElem) accElem.textContent = `${q.accuracy || 0}%`;
+
+        const shotAImg = document.getElementById('review-shot-a-img');
+        if (shotAImg) shotAImg.src = q.shotA;
+
+        const shotBImg = document.getElementById('review-shot-b-img');
+        if (shotBImg) shotBImg.src = q.shotB;
+
+        const quickKeyElem = document.getElementById('review-quick-key');
+        if (quickKeyElem) quickKeyElem.textContent = q.quickKey || 'Full working in Shot B';
 
         this.updateCurrentStarBtnUI(q.is_starred);
         
@@ -1377,15 +1422,17 @@
         clearInterval(this.timerInterval);
         this.timeRemaining = seconds;
         this.timeElapsed = 0;
-        isOvertime = false;
+        this.isOvertime = false;
 
         const display = document.getElementById('timer-display');
         const fill = document.getElementById('timer-progress-fill');
         const label = document.getElementById('timer-status-label');
-        label.textContent = this.isFlashMode ? 'Flash Pacing' : 'Time Remaining';
-        label.className = 'text-[10px] uppercase font-bold text-gray-400';
-        display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
-        fill.className = 'h-full bg-ms-blue transition-all duration-300';
+        if (label) {
+          label.textContent = this.isFlashMode ? 'Flash Pacing' : 'Time Remaining';
+          label.className = 'text-[10px] uppercase font-bold text-gray-400';
+        }
+        if (display) display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
+        if (fill) fill.className = 'h-full bg-ms-blue transition-all duration-300';
 
         this.updateTimerUI(this.timeRemaining, seconds);
 
@@ -1397,14 +1444,16 @@
 
             if (this.timeRemaining <= 0) {
               this.isOvertime = true;
-              label.textContent = 'Overtime Recorded';
-              label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
-              display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
-              fill.className = 'h-full bg-red-500';
+              if (label) {
+                label.textContent = 'Overtime Recorded';
+                label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
+              }
+              if (display) display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
+              if (fill) fill.className = 'h-full bg-red-500';
             }
           } else {
             const overSeconds = this.timeElapsed - seconds;
-            display.textContent = `+${this.formatTime(overSeconds)}`;
+            if (display) display.textContent = `+${this.formatTime(overSeconds)}`;
           }
         }, 1000);
       },
@@ -1412,13 +1461,13 @@
       updateTimerUI(rem, total) {
         const display = document.getElementById('timer-display');
         const fill = document.getElementById('timer-progress-fill');
-        display.textContent = this.formatTime(rem);
+        if (display) display.textContent = this.formatTime(rem);
         const pct = Math.max(0, (rem / total) * 100);
-        fill.style.width = `${pct}%`;
+        if (fill) fill.style.width = `${pct}%`;
 
         if (rem <= 15 && rem > 0) {
-          display.className = 'font-mono text-2xl font-bold tracking-tight text-amber-600 animate-pulse';
-          fill.className = 'h-full bg-amber-500 transition-all duration-300';
+          if (display) display.className = 'font-mono text-2xl font-bold tracking-tight text-amber-600 animate-pulse';
+          if (fill) fill.className = 'h-full bg-amber-500 transition-all duration-300';
         }
       },
 
@@ -1431,16 +1480,17 @@
       triggerShowAnswer() {
         clearInterval(this.timerInterval);
         const solveTimeStr = this.formatTime(this.timeElapsed);
-        document.getElementById('review-elapsed-recorded').textContent = solveTimeStr + (this.isOvertime ? ' (Overtime)' : '');
-        document.getElementById('action-bar-solving').classList.add('hidden');
-        document.getElementById('verification-panel').classList.remove('hidden');
+        const elapsedElem = document.getElementById('review-elapsed-recorded');
+        if (elapsedElem) elapsedElem.textContent = solveTimeStr + (this.isOvertime ? ' (Overtime)' : '');
+        document.getElementById('action-bar-solving')?.classList.add('hidden');
+        document.getElementById('verification-panel')?.classList.remove('hidden');
         lucide.createIcons();
       },
 
       giveUpCurrentQuestion() {
         clearInterval(this.timerInterval);
-        document.getElementById('action-bar-solving').classList.add('hidden');
-        document.getElementById('verification-panel').classList.remove('hidden');
+        document.getElementById('action-bar-solving')?.classList.add('hidden');
+        document.getElementById('verification-panel')?.classList.remove('hidden');
         this.selfGradeOutcome(false, true);
       },
 
@@ -1498,9 +1548,9 @@
 
       renderSessionComplete() {
         clearInterval(this.timerInterval);
-        document.getElementById('review-active-panel').classList.add('hidden');
+        document.getElementById('review-active-panel')?.classList.add('hidden');
         const completePanel = document.getElementById('review-complete-panel');
-        completePanel.classList.remove('hidden');
+        if (completePanel) completePanel.classList.remove('hidden');
 
         const totalCount = this.currentReviewQueue.length;
         const correctCount = this.currentReviewQueue.filter(q => {
@@ -1509,9 +1559,14 @@
         }).length;
         const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
-        document.getElementById('complete-total-count').textContent = totalCount;
-        document.getElementById('complete-correct-count').textContent = `${correctCount} / ${totalCount}`;
-        document.getElementById('complete-accuracy').textContent = `${accuracy}%`;
+        const totalElem = document.getElementById('complete-total-count');
+        if (totalElem) totalElem.textContent = totalCount;
+
+        const corrElem = document.getElementById('complete-correct-count');
+        if (corrElem) corrElem.textContent = `${correctCount} / ${totalCount}`;
+
+        const accElem = document.getElementById('complete-accuracy');
+        if (accElem) accElem.textContent = `${accuracy}%`;
 
         const badgeElem = document.getElementById(`badge-${this.currentSlot}-quota`);
         if (badgeElem) badgeElem.textContent = `${totalCount}/${totalCount} Done`;
@@ -1524,8 +1579,8 @@
         const q = this.currentReviewQueue[this.currentCardIndex];
         const hintBox = document.getElementById('hint-container');
         const hintText = document.getElementById('hint-text');
-        hintText.textContent = `Focus on the foundational principle in ${q.chapter}. Setup the governing formula/balance before substituting variables.`;
-        hintBox.classList.remove('hidden');
+        if (hintText) hintText.textContent = `Focus on the foundational principle in ${q.chapter}. Setup the governing formula/balance before substituting variables.`;
+        if (hintBox) hintBox.classList.remove('hidden');
         lucide.createIcons();
       },
 
@@ -1535,36 +1590,41 @@
         this.readFileAsCompressedDataURL(file, dataUrl => {
           if (shotType === 'a') {
             this.uploadedShotA = dataUrl;
-            document.getElementById('placeholder-box-a').classList.add('hidden');
-            document.getElementById('preview-box-a').classList.remove('hidden');
-            document.getElementById('img-preview-a').src = dataUrl;
+            document.getElementById('placeholder-box-a')?.classList.add('hidden');
+            document.getElementById('preview-box-a')?.classList.remove('hidden');
+            const img = document.getElementById('img-preview-a');
+            if (img) img.src = dataUrl;
           } else {
             this.uploadedShotB = dataUrl;
-            document.getElementById('placeholder-box-b').classList.add('hidden');
-            document.getElementById('preview-box-b').classList.remove('hidden');
-            document.getElementById('img-preview-b').src = dataUrl;
+            document.getElementById('placeholder-box-b')?.classList.add('hidden');
+            document.getElementById('preview-box-b')?.classList.remove('hidden');
+            const img = document.getElementById('img-preview-b');
+            if (img) img.src = dataUrl;
           }
         });
       },
 
       initClipboardListener() {
         window.addEventListener('paste', e => {
-          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          const items = (e.clipboardData || e.originalEvent.clipboardData)?.items;
+          if (!items) return;
           for (let item of items) {
             if (item.kind === 'file' && item.type.startsWith('image/')) {
               const blob = item.getAsFile();
               this.readFileAsCompressedDataURL(blob, dataUrl => {
                 if (!this.uploadedShotA) {
                   this.uploadedShotA = dataUrl;
-                  document.getElementById('placeholder-box-a').classList.add('hidden');
-                  document.getElementById('preview-box-a').classList.remove('hidden');
-                  document.getElementById('img-preview-a').src = dataUrl;
+                  document.getElementById('placeholder-box-a')?.classList.add('hidden');
+                  document.getElementById('preview-box-a')?.classList.remove('hidden');
+                  const img = document.getElementById('img-preview-a');
+                  if (img) img.src = dataUrl;
                   this.showToast('Pasted into Shot A (Question)');
                 } else {
                   this.uploadedShotB = dataUrl;
-                  document.getElementById('placeholder-box-b').classList.add('hidden');
-                  document.getElementById('preview-box-b').classList.remove('hidden');
-                  document.getElementById('img-preview-b').src = dataUrl;
+                  document.getElementById('placeholder-box-b')?.classList.add('hidden');
+                  document.getElementById('preview-box-b')?.classList.remove('hidden');
+                  const img = document.getElementById('img-preview-b');
+                  if (img) img.src = dataUrl;
                   this.showToast('Pasted into Shot B (Solution)');
                 }
               });
@@ -1598,27 +1658,30 @@
       },
 
       toggleBulkModeUI() {
-        const isBulk = document.getElementById('ingest-bulk-mode').checked;
+        const isBulk = document.getElementById('ingest-bulk-mode')?.checked;
         const counter = document.getElementById('bulk-batch-counter');
         const doneBtn = document.getElementById('bulk-done-btn');
         if (isBulk) {
-          counter.classList.remove('hidden');
-          counter.textContent = `${this.bulkBatchCount} Logged`;
-          if (this.bulkBatchCount > 0) doneBtn.classList.remove('hidden');
+          if (counter) {
+            counter.classList.remove('hidden');
+            counter.textContent = `${this.bulkBatchCount} Logged`;
+          }
+          if (this.bulkBatchCount > 0 && doneBtn) doneBtn.classList.remove('hidden');
           this.showToast('⚡ Continuous Mode ON: Subject & Mock tags stay locked between questions!');
         } else {
-          counter.classList.add('hidden');
-          doneBtn.classList.add('hidden');
+          if (counter) counter.classList.add('hidden');
+          if (doneBtn) doneBtn.classList.add('hidden');
         }
       },
 
       finishBulkBatch() {
         const total = this.bulkBatchCount;
         this.bulkBatchCount = 0;
-        document.getElementById('bulk-batch-counter').classList.add('hidden');
-        document.getElementById('bulk-done-btn').classList.add('hidden');
-        document.getElementById('ingest-bulk-mode').checked = false;
-        document.getElementById('ingest-form').reset();
+        document.getElementById('bulk-batch-counter')?.classList.add('hidden');
+        document.getElementById('bulk-done-btn')?.classList.add('hidden');
+        const bulkCheck = document.getElementById('ingest-bulk-mode');
+        if (bulkCheck) bulkCheck.checked = false;
+        document.getElementById('ingest-form')?.reset();
         this.switchTab('bank');
         this.showToast(`🎉 Batch complete! Logged ${total} test mistakes to ledger.`);
       },
@@ -1630,21 +1693,21 @@
           return;
         }
 
-        const subj = document.getElementById('ingest-subject').value.trim();
+        const subj = document.getElementById('ingest-subject')?.value.trim() || 'Physics';
         const prefix = (subj || 'Q').slice(0, 3).toUpperCase();
         const displayId = `#${prefix}-${String(this.questionBank.length + 1).padStart(3, '0')}`;
-        const isBulk = document.getElementById('ingest-bulk-mode').checked;
+        const isBulk = document.getElementById('ingest-bulk-mode')?.checked || false;
 
         const newQ = {
           id: 'q_' + Date.now(),
           displayId: displayId,
           subject: subj,
-          chapter: document.getElementById('ingest-chapter').value.trim(),
-          difficulty: document.getElementById('ingest-difficulty').value,
-          allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 60,
-          test_source: document.getElementById('ingest-test-source').value.trim(),
-          quickKey: document.getElementById('ingest-quick-key').value.trim() || 'See Solution Derivation',
-          error_tag: document.getElementById('ingest-error-tag').value.trim(),
+          chapter: document.getElementById('ingest-chapter')?.value.trim() || 'General',
+          difficulty: document.getElementById('ingest-difficulty')?.value || 'Medium',
+          allocatedTime: parseInt(document.getElementById('ingest-timer')?.value) || 60,
+          test_source: document.getElementById('ingest-test-source')?.value.trim() || '',
+          quickKey: document.getElementById('ingest-quick-key')?.value.trim() || 'See Solution Derivation',
+          error_tag: document.getElementById('ingest-error-tag')?.value.trim() || '',
           is_starred: false,
           graduated: false,
           last_failed_at: 0,
@@ -1662,37 +1725,43 @@
         if (isBulk) {
           this.bulkBatchCount++;
           const counter = document.getElementById('bulk-batch-counter');
-          counter.classList.remove('hidden');
-          counter.textContent = `${this.bulkBatchCount} Logged`;
-          document.getElementById('bulk-done-btn').classList.remove('hidden');
+          if (counter) {
+            counter.classList.remove('hidden');
+            counter.textContent = `${this.bulkBatchCount} Logged`;
+          }
+          document.getElementById('bulk-done-btn')?.classList.remove('hidden');
 
-          // Reset only card-specific inputs; retain subject & test tag!
-          document.getElementById('ingest-chapter').value = '';
-          document.getElementById('ingest-quick-key').value = '';
-          document.getElementById('ingest-error-tag').value = '';
+          const chapterElem = document.getElementById('ingest-chapter');
+          if (chapterElem) chapterElem.value = '';
+          const keyElem = document.getElementById('ingest-quick-key');
+          if (keyElem) keyElem.value = '';
+          const tagElem = document.getElementById('ingest-error-tag');
+          if (tagElem) tagElem.value = '';
+          
           document.querySelectorAll('.err-chip').forEach(btn => {
             btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
           });
 
           this.uploadedShotA = null;
           this.uploadedShotB = null;
-          document.getElementById('placeholder-box-a').classList.remove('hidden');
-          document.getElementById('preview-box-a').classList.add('hidden');
-          document.getElementById('placeholder-box-b').classList.remove('hidden');
-          document.getElementById('preview-box-b').classList.add('hidden');
+          document.getElementById('placeholder-box-a')?.classList.remove('hidden');
+          document.getElementById('preview-box-a')?.classList.add('hidden');
+          document.getElementById('placeholder-box-b')?.classList.remove('hidden');
+          document.getElementById('preview-box-b')?.classList.add('hidden');
 
-          document.getElementById('ingest-chapter').focus();
+          chapterElem?.focus();
           this.showToast(`⚡ Saved ${displayId}! Ready for #${this.bulkBatchCount + 1}`);
         } else {
           this.showToast(`Saved ${displayId} (${subj})!`);
-          document.getElementById('ingest-form').reset();
+          document.getElementById('ingest-form')?.reset();
           this.uploadedShotA = null;
           this.uploadedShotB = null;
-          document.getElementById('placeholder-box-a').classList.remove('hidden');
-          document.getElementById('preview-box-a').classList.add('hidden');
-          document.getElementById('placeholder-box-b').classList.remove('hidden');
-          document.getElementById('preview-box-b').classList.add('hidden');
-          document.getElementById('ingest-error-tag').value = '';
+          document.getElementById('placeholder-box-a')?.classList.remove('hidden');
+          document.getElementById('preview-box-a')?.classList.add('hidden');
+          document.getElementById('placeholder-box-b')?.classList.remove('hidden');
+          document.getElementById('preview-box-b')?.classList.add('hidden');
+          const tagElem = document.getElementById('ingest-error-tag');
+          if (tagElem) tagElem.value = '';
           document.querySelectorAll('.err-chip').forEach(btn => {
             btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
           });
@@ -1701,7 +1770,11 @@
       },
 
       saveBankToStorage(pushToCloud = false, questionToSync = null) {
-        localStorage.setItem('retain_bank_v2', JSON.stringify(this.questionBank));
+        try {
+          localStorage.setItem('retain_bank_v2', JSON.stringify(this.questionBank));
+        } catch (e) {
+          console.warn('LocalStorage Quota Warning:', e);
+        }
         this.updateBankCounters();
         if (pushToCloud && questionToSync) {
           this.syncQuestionToCloud(questionToSync);
@@ -1713,21 +1786,31 @@
         const gradCount = this.questionBank.filter(q => q.graduated).length;
         const starCount = this.questionBank.filter(q => q.is_starred).length;
 
-        document.getElementById('tab-bank-count').textContent = this.questionBank.length;
-        document.getElementById('stat-active-q').textContent = activeCount;
-        document.getElementById('stat-graduated-badge').textContent = `${gradCount} Mastered`;
-        document.getElementById('badge-starred-count').textContent = starCount;
+        const tabCount = document.getElementById('tab-bank-count');
+        if (tabCount) tabCount.textContent = this.questionBank.length;
+
+        const activeElem = document.getElementById('stat-active-q');
+        if (activeElem) activeElem.textContent = activeCount;
+
+        const gradElem = document.getElementById('stat-graduated-badge');
+        if (gradElem) gradElem.textContent = `${gradCount} Mastered`;
+
+        const starElem = document.getElementById('badge-starred-count');
+        if (starElem) starElem.textContent = starCount;
 
         const marksSalvaged = gradCount * 5;
-        document.getElementById('stat-marks-salvaged').textContent = `+${marksSalvaged} Marks`;
+        const marksElem = document.getElementById('stat-marks-salvaged');
+        if (marksElem) marksElem.textContent = `+${marksSalvaged} Marks`;
 
         this.updateLeakageMatrix();
 
         if (this.questionBank.length > 0) {
-          const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts.total || 0), 0);
-          const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts.correct || 0), 0);
+          const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts?.total || 0), 0);
+          const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts?.correct || 0), 0);
           const avg = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
-          document.getElementById('stat-avg-accuracy').textContent = `${avg}%`;
+          
+          const accElem = document.getElementById('stat-avg-accuracy');
+          if (accElem) accElem.textContent = `${avg}%`;
         }
       },
 
@@ -1740,10 +1823,17 @@
         const conceptCount = taggedQuestions.filter(q => q.error_tag === 'Concept Blank').length;
         const trapCount = taggedQuestions.filter(q => q.error_tag === 'Question Trap').length;
 
-        document.getElementById('leak-calc').textContent = `${Math.round((calcCount / total) * 100)}% (${calcCount})`;
-        document.getElementById('leak-ncert').textContent = `${Math.round((ncertCount / total) * 100)}% (${ncertCount})`;
-        document.getElementById('leak-concept').textContent = `${Math.round((conceptCount / total) * 100)}% (${conceptCount})`;
-        document.getElementById('leak-trap').textContent = `${Math.round((trapCount / total) * 100)}% (${trapCount})`;
+        const calcElem = document.getElementById('leak-calc');
+        if (calcElem) calcElem.textContent = `${Math.round((calcCount / total) * 100)}% (${calcCount})`;
+
+        const ncertElem = document.getElementById('leak-ncert');
+        if (ncertElem) ncertElem.textContent = `${Math.round((ncertCount / total) * 100)}% (${ncertCount})`;
+
+        const conceptElem = document.getElementById('leak-concept');
+        if (conceptElem) conceptElem.textContent = `${Math.round((conceptCount / total) * 100)}% (${conceptCount})`;
+
+        const trapElem = document.getElementById('leak-trap');
+        if (trapElem) trapElem.textContent = `${Math.round((trapCount / total) * 100)}% (${trapCount})`;
       },
 
       setBankFilter(f) {
@@ -1763,7 +1853,8 @@
 
       renderBankTable() {
         const grid = document.getElementById('bank-grid');
-        const search = document.getElementById('bank-search').value.toLowerCase();
+        if (!grid) return;
+        const search = document.getElementById('bank-search')?.value.toLowerCase() || '';
         const f = this.currentBankFilter;
 
         const filtered = this.questionBank.filter(q => {
@@ -1837,48 +1928,75 @@
         const q = this.questionBank.find(item => item.id === id);
         if (!q) return;
 
-        document.getElementById('prev-modal-qid').textContent = q.displayId || `#${q.id.slice(-4)}`;
-        document.getElementById('prev-modal-subject').textContent = q.subject;
-        document.getElementById('prev-modal-chapter').textContent = q.chapter;
-        document.getElementById('prev-modal-attempts').textContent = q.attempts.total || 0;
-        document.getElementById('prev-modal-accuracy').textContent = `${q.accuracy || 0}%`;
-        document.getElementById('prev-modal-key').textContent = q.quickKey || 'None';
-        document.getElementById('prev-modal-errortag').textContent = q.error_tag || 'None';
+        const qid = document.getElementById('prev-modal-qid');
+        if (qid) qid.textContent = q.displayId || `#${q.id.slice(-4)}`;
+
+        const subj = document.getElementById('prev-modal-subject');
+        if (subj) subj.textContent = q.subject;
+
+        const chap = document.getElementById('prev-modal-chapter');
+        if (chap) chap.textContent = q.chapter;
+
+        const att = document.getElementById('prev-modal-attempts');
+        if (att) att.textContent = q.attempts?.total || 0;
+
+        const acc = document.getElementById('prev-modal-accuracy');
+        if (acc) acc.textContent = `${q.accuracy || 0}%`;
+
+        const key = document.getElementById('prev-modal-key');
+        if (key) key.textContent = q.quickKey || 'None';
+
+        const tag = document.getElementById('prev-modal-errortag');
+        if (tag) tag.textContent = q.error_tag || 'None';
 
         const gradBadge = document.getElementById('prev-modal-grad-badge');
-        if (q.graduated) gradBadge.classList.remove('hidden');
-        else gradBadge.classList.add('hidden');
-
-        const starBadge = document.getElementById('prev-modal-star-badge');
-        if (q.is_starred) starBadge.classList.remove('hidden');
-        else starBadge.classList.add('hidden');
-
-        const testBadge = document.getElementById('prev-modal-test-badge');
-        if (q.test_source) {
-          testBadge.textContent = q.test_source;
-          testBadge.classList.remove('hidden');
-        } else {
-          testBadge.classList.add('hidden');
+        if (gradBadge) {
+          if (q.graduated) gradBadge.classList.remove('hidden');
+          else gradBadge.classList.add('hidden');
         }
 
-        document.getElementById('prev-modal-shot-a').src = q.shotA;
-        document.getElementById('prev-modal-shot-b').src = q.shotB;
+        const starBadge = document.getElementById('prev-modal-star-badge');
+        if (starBadge) {
+          if (q.is_starred) starBadge.classList.remove('hidden');
+          else starBadge.classList.add('hidden');
+        }
 
-        document.getElementById('prev-modal-del-btn').onclick = () => this.deleteQuestion(q.id);
-        document.getElementById('prev-modal-practice-btn').onclick = () => {
-          this.closePreviewModal();
-          this.currentReviewQueue = [q];
-          this.currentCardIndex = 0;
-          this.switchTab('review');
-          this.renderCurrentCard();
-        };
+        const testBadge = document.getElementById('prev-modal-test-badge');
+        if (testBadge) {
+          if (q.test_source) {
+            testBadge.textContent = q.test_source;
+            testBadge.classList.remove('hidden');
+          } else {
+            testBadge.classList.add('hidden');
+          }
+        }
 
-        document.getElementById('modal-preview').classList.remove('hidden');
+        const shotA = document.getElementById('prev-modal-shot-a');
+        if (shotA) shotA.src = q.shotA;
+
+        const shotB = document.getElementById('prev-modal-shot-b');
+        if (shotB) shotB.src = q.shotB;
+
+        const delBtn = document.getElementById('prev-modal-del-btn');
+        if (delBtn) delBtn.onclick = () => this.deleteQuestion(q.id);
+
+        const practiceBtn = document.getElementById('prev-modal-practice-btn');
+        if (practiceBtn) {
+          practiceBtn.onclick = () => {
+            this.closePreviewModal();
+            this.currentReviewQueue = [q];
+            this.currentCardIndex = 0;
+            this.switchTab('review');
+            this.renderCurrentCard();
+          };
+        }
+
+        document.getElementById('modal-preview')?.classList.remove('hidden');
         lucide.createIcons();
       },
 
       closePreviewModal() {
-        document.getElementById('modal-preview').classList.add('hidden');
+        document.getElementById('modal-preview')?.classList.add('hidden');
       },
 
       initNotificationEngine() {
@@ -1892,11 +2010,11 @@
         const statusText = document.getElementById('perm-status-text');
 
         if (hasPerm) {
-          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
-          statusText.textContent = 'System Alerts: Active on this Device';
+          if (statusInd) statusInd.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+          if (statusText) statusText.textContent = 'System Alerts: Active on this Device';
         } else {
-          statusInd.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
-          statusText.textContent = 'System Alerts: Permission Needed';
+          if (statusInd) statusInd.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+          if (statusText) statusText.textContent = 'System Alerts: Permission Needed';
         }
         lucide.createIcons();
       },
@@ -1928,9 +2046,9 @@
         const todayDate = now.toISOString().split('T')[0];
 
         const slots = [
-          { key: 'morning', time: document.getElementById('cfg-time-morning').value, title: '☀️ Morning Review Batch', body: '10 questions queued. Maintain your streak!' },
-          { key: 'midday',  time: document.getElementById('cfg-time-midday').value,  title: '🌤️ Midday Checkpoint', body: 'Midday sprint ready. Target your missed formulas.' },
-          { key: 'evening', time: document.getElementById('cfg-time-evening').value, title: '🌙 Evening Deep Dive', body: 'Clear your mistake backlog for today!' }
+          { key: 'morning', time: document.getElementById('cfg-time-morning')?.value, title: '☀️ Morning Review Batch', body: '10 questions queued. Maintain your streak!' },
+          { key: 'midday',  time: document.getElementById('cfg-time-midday')?.value,  title: '🌤️ Midday Checkpoint', body: 'Midday sprint ready. Target your missed formulas.' },
+          { key: 'evening', time: document.getElementById('cfg-time-evening')?.value, title: '🌙 Evening Deep Dive', body: 'Clear your mistake backlog for today!' }
         ];
 
         slots.forEach(slot => {
@@ -1944,12 +2062,12 @@
 
       saveScheduleConfig() {
         const cfg = {
-          mTime: document.getElementById('cfg-time-morning').value,
-          mQuota: document.getElementById('cfg-quota-morning').value,
-          dTime: document.getElementById('cfg-time-midday').value,
-          dQuota: document.getElementById('cfg-quota-midday').value,
-          eTime: document.getElementById('cfg-time-evening').value,
-          eQuota: document.getElementById('cfg-quota-evening').value
+          mTime: document.getElementById('cfg-time-morning')?.value,
+          mQuota: document.getElementById('cfg-quota-morning')?.value,
+          dTime: document.getElementById('cfg-time-midday')?.value,
+          dQuota: document.getElementById('cfg-quota-midday')?.value,
+          eTime: document.getElementById('cfg-time-evening')?.value,
+          eQuota: document.getElementById('cfg-quota-evening')?.value
         };
         localStorage.setItem('retain_schedule_cfg', JSON.stringify(cfg));
         this.updateQuotaBadges();
@@ -1959,20 +2077,36 @@
       loadScheduleConfig() {
         const cfg = JSON.parse(localStorage.getItem('retain_schedule_cfg'));
         if (cfg) {
-          if (document.getElementById('cfg-time-morning')) document.getElementById('cfg-time-morning').value = cfg.mTime || '08:00';
-          if (document.getElementById('cfg-quota-morning')) document.getElementById('cfg-quota-morning').value = cfg.mQuota || '10';
-          if (document.getElementById('cfg-time-midday')) document.getElementById('cfg-time-midday').value = cfg.dTime || '14:00';
-          if (document.getElementById('cfg-quota-midday')) document.getElementById('cfg-quota-midday').value = cfg.dQuota || '10';
-          if (document.getElementById('cfg-time-evening')) document.getElementById('cfg-time-evening').value = cfg.eTime || '20:30';
-          if (document.getElementById('cfg-quota-evening')) document.getElementById('cfg-quota-evening').value = cfg.eQuota || '20';
+          const tm = document.getElementById('cfg-time-morning');
+          if (tm) tm.value = cfg.mTime || '08:00';
+          const qm = document.getElementById('cfg-quota-morning');
+          if (qm) qm.value = cfg.mQuota || '10';
+
+          const td = document.getElementById('cfg-time-midday');
+          if (td) td.value = cfg.dTime || '14:00';
+          const qd = document.getElementById('cfg-quota-midday');
+          if (qd) qd.value = cfg.dQuota || '10';
+
+          const te = document.getElementById('cfg-time-evening');
+          if (te) te.value = cfg.eTime || '20:30';
+          const qe = document.getElementById('cfg-quota-evening');
+          if (qe) qe.value = cfg.eQuota || '20';
         }
         this.updateQuotaBadges();
       },
 
       updateQuotaBadges() {
-        document.getElementById('badge-morning-quota').textContent = `0/${document.getElementById('cfg-quota-morning').value}`;
-        document.getElementById('badge-midday-quota').textContent = `0/${document.getElementById('cfg-quota-midday').value}`;
-        document.getElementById('badge-evening-quota').textContent = `0/${document.getElementById('cfg-quota-evening').value}`;
+        const bm = document.getElementById('badge-morning-quota');
+        const qm = document.getElementById('cfg-quota-morning')?.value || 10;
+        if (bm) bm.textContent = `0/${qm}`;
+
+        const bd = document.getElementById('badge-midday-quota');
+        const qd = document.getElementById('cfg-quota-midday')?.value || 10;
+        if (bd) bd.textContent = `0/${qd}`;
+
+        const be = document.getElementById('badge-evening-quota');
+        const qe = document.getElementById('cfg-quota-evening')?.value || 20;
+        if (be) be.textContent = `0/${qe}`;
       },
 
       exportDataJSON() {
@@ -2009,13 +2143,19 @@
 
       switchTab(tabId) {
         ['review', 'ingest', 'bank', 'settings'].forEach(id => {
-          document.getElementById(`view-${id}`).classList.add('hidden');
-          document.getElementById(`tab-${id}`).classList.remove('border-ms-blue', 'text-ms-blue', 'font-semibold');
-          document.getElementById(`tab-${id}`).classList.add('border-transparent', 'text-gray-500');
+          document.getElementById(`view-${id}`)?.classList.add('hidden');
+          const tabBtn = document.getElementById(`tab-${id}`);
+          if (tabBtn) {
+            tabBtn.classList.remove('border-ms-blue', 'text-ms-blue', 'font-semibold');
+            tabBtn.classList.add('border-transparent', 'text-gray-500');
+          }
         });
-        document.getElementById(`view-${tabId}`).classList.remove('hidden');
-        document.getElementById(`tab-${tabId}`).classList.add('border-ms-blue', 'text-ms-blue', 'font-semibold');
-        document.getElementById(`tab-${tabId}`).classList.remove('border-transparent', 'text-gray-500');
+        document.getElementById(`view-${tabId}`)?.classList.remove('hidden');
+        const activeTabBtn = document.getElementById(`tab-${tabId}`);
+        if (activeTabBtn) {
+          activeTabBtn.classList.add('border-ms-blue', 'text-ms-blue', 'font-semibold');
+          activeTabBtn.classList.remove('border-transparent', 'text-gray-500');
+        }
 
         if (tabId === 'bank') this.renderBankTable();
         lucide.createIcons();
@@ -2028,20 +2168,24 @@
 
       showToast(msg, icon = 'info') {
         const toast = document.getElementById('toast');
-        document.getElementById('toast-message').textContent = msg;
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        const toastMsg = document.getElementById('toast-message');
+        if (toastMsg) toastMsg.textContent = msg;
+        if (toast) {
+          toast.classList.remove('translate-y-20', 'opacity-0');
+          setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
       },
 
       zoomImage(type) {
         const target = document.getElementById('zoom-img-target');
-        target.src = type === 'question' ? document.getElementById('review-shot-a-img').src : document.getElementById('review-shot-b-img').src;
-        document.getElementById('modal-zoom').classList.remove('hidden');
+        if (!target) return;
+        target.src = type === 'question' ? document.getElementById('review-shot-a-img')?.src : document.getElementById('review-shot-b-img')?.src;
+        document.getElementById('modal-zoom')?.classList.remove('hidden');
         lucide.createIcons();
       },
 
       closeZoomModal() {
-        document.getElementById('modal-zoom').classList.add('hidden');
+        document.getElementById('modal-zoom')?.classList.add('hidden');
       }
     };
 
