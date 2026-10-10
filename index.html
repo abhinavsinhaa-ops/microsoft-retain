@@ -59,6 +59,26 @@
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #484644;
     }
+    @media print {
+      header, nav, #view-ingest, #view-settings, .no-print, button {
+        display: none !important;
+      }
+      body, main, #view-bank {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+      }
+      .print-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+      }
+      .print-card {
+        page-break-inside: avoid !important;
+        border: 1px solid #ccc !important;
+        padding: 12px !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-[#F8F9FA] dark:bg-[#121212] text-[#242424] dark:text-[#E1DFDD] font-segoe min-h-screen flex flex-col transition-colors duration-200">
@@ -85,7 +105,7 @@
         <!-- Realtime WebSocket Status Pill -->
         <button onclick="app.switchTab('settings')" id="cloud-status-pill" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 hover:bg-gray-100 transition">
           <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-          <span id="cloud-status-text" class="text-gray-600 dark:text-gray-300">Connecting...</span>
+          <span id="cloud-status-text" class="text-gray-600 dark:text-gray-300">Syncing...</span>
         </button>
       </div>
 
@@ -108,18 +128,18 @@
         </button>
       </div>
 
-      <!-- Right Controls -->
-      <div class="flex items-center gap-2.5">
-        <!-- Mastery Counter -->
-        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
-          <i data-lucide="award" class="w-3.5 h-3.5"></i>
-          <span id="stat-graduated-badge">0 Mastered</span>
+      <!-- Right Controls: Net Marks Salvaged (+5 Swing) & Streak -->
+      <div class="flex items-center gap-2">
+        <!-- Marks Salvaged Counter -->
+        <div title="Net Score Swing: +5 marks per converted mistake" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="target" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span id="stat-marks-salvaged">+0 Marks</span>
         </div>
 
-        <!-- Streak Counter -->
-        <div class="flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 rounded-md text-xs font-semibold border border-amber-200 dark:border-amber-800">
-          <i data-lucide="flame" class="w-4 h-4 fill-amber-500 text-amber-500"></i>
-          <span id="stat-streak">Active</span>
+        <!-- Mastered Badge -->
+        <div class="hidden sm:flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-950/40 text-ms-blue rounded-md text-xs font-semibold border border-blue-200 dark:border-blue-800">
+          <i data-lucide="award" class="w-3.5 h-3.5"></i>
+          <span id="stat-graduated-badge">0 Mastered</span>
         </div>
 
         <!-- Dark Mode Toggle -->
@@ -171,6 +191,7 @@
                 <span id="review-chapter-badge" class="text-xs text-gray-600 dark:text-gray-300 font-medium">Rotational Dynamics</span>
                 <span id="review-difficulty-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Hard</span>
                 <span id="review-errortag-badge" class="hidden px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">Calc Slip</span>
+                <span id="review-testtag-badge" class="hidden px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300">#Mock</span>
               </div>
               <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-3">
                 <span>Card <strong id="review-current-index" class="text-gray-800 dark:text-gray-200">1</strong> of <strong id="review-total-count">10</strong></span>
@@ -180,19 +201,28 @@
             </div>
           </div>
 
-          <!-- Dynamic Timer & Star / Delete Controls -->
-          <div class="flex items-center gap-2.5">
+          <!-- Dynamic Timer & Flash / Star / Delete Controls -->
+          <div class="flex items-center gap-2">
+            <!-- Rapid Flash Mode Toggle (15-Second Drill) -->
+            <button onclick="app.toggleFlashMode()" id="flash-mode-btn" title="Toggle 15s Rapid Flash Mode (Mental Recall)" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 text-xs font-bold flex items-center gap-1 transition">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span id="flash-mode-label">Flash: Off</span>
+            </button>
+
+            <!-- Timer Display -->
             <div class="text-right">
               <div class="text-[10px] uppercase font-bold text-gray-400" id="timer-status-label">Time Remaining</div>
               <div class="font-mono text-2xl font-bold tracking-tight text-ms-blue" id="timer-display">02:00</div>
             </div>
-            <div class="w-10 h-10 rounded-full border-2 border-ms-blue flex items-center justify-center text-ms-blue mr-2" id="timer-indicator-circle">
+            <div class="w-10 h-10 rounded-full border-2 border-ms-blue flex items-center justify-center text-ms-blue mr-1" id="timer-indicator-circle">
               <i data-lucide="clock" class="w-5 h-5"></i>
             </div>
+            
             <!-- Quick Star Button -->
             <button onclick="app.toggleCurrentStar()" id="review-star-btn" title="Toggle High-Yield Star" class="p-2 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition">
               <i data-lucide="star" class="w-5 h-5"></i>
             </button>
+            
             <!-- Quick Delete Button -->
             <button onclick="app.deleteCurrentQuestion()" title="Permanently delete this question" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -405,10 +435,16 @@
             </div>
           </div>
 
-          <!-- Quick Answer Key -->
-          <div>
-            <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Quick Answer Key (Optional - for instant check)</label>
-            <input type="text" id="ingest-quick-key" placeholder="e.g., Option (C) or 3.2 m/s²" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+          <!-- Test Batch / Mock Source & Quick Answer Key -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mock / Test Batch Tag (Optional)</label>
+              <input type="text" id="ingest-test-source" placeholder="e.g., #AIATS-03 or #Allen-Major-02" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Quick Answer Key (Optional)</label>
+              <input type="text" id="ingest-quick-key" placeholder="e.g., Option (C) or 3.2 m/s²" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+            </div>
           </div>
 
           <!-- 1-TAP ROOT CAUSE ERROR CHIPS -->
@@ -483,14 +519,43 @@
       </div>
     </section>
 
-    <!-- VIEW 3: PERFORMANCE LEDGER & MISTAKE BANK -->
+    <!-- VIEW 3: PERFORMANCE LEDGER & ROOT CAUSE MATRIX -->
     <section id="view-bank" class="hidden space-y-6">
       
-      <!-- Filters and Fast Subject Quick-Chips -->
-      <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
+      <!-- 3.1 ROOT CAUSE LEAKAGE MATRIX DIAGNOSTIC CARD -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm space-y-3 no-print">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-ms-blue"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Root Cause Leakage Matrix (Diagnostic)</h3>
+          </div>
+          <span class="text-[11px] text-gray-400">Live Breakdown</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs" id="leakage-matrix-grid">
+          <div class="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
+            <span class="text-gray-500 dark:text-gray-400 block text-[11px]">🔢 Calculation Slips</span>
+            <strong id="leak-calc" class="text-base font-bold text-blue-700 dark:text-blue-300">0%</strong>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
+            <span class="text-gray-500 dark:text-gray-400 block text-[11px]">📖 NCERT Line Overlooked</span>
+            <strong id="leak-ncert" class="text-base font-bold text-emerald-700 dark:text-emerald-300">0%</strong>
+          </div>
+          <div class="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900">
+            <span class="text-gray-500 dark:text-gray-400 block text-[11px]">🧠 Concept / Formula Blank</span>
+            <strong id="leak-concept" class="text-base font-bold text-purple-700 dark:text-purple-300">0%</strong>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900">
+            <span class="text-gray-500 dark:text-gray-400 block text-[11px]">⚠️ Misread / Trap Option</span>
+            <strong id="leak-trap" class="text-base font-bold text-amber-700 dark:text-amber-300">0%</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Printable Sunday Sheet Action -->
+      <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4 no-print">
         
         <div class="flex items-center gap-2 flex-wrap">
-          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search ID, topic..." class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-48 sm:w-56">
+          <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search ID, topic, #Mock..." class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-48 sm:w-56">
           
           <!-- Subject & Status Chips -->
           <div class="flex items-center gap-1 overflow-x-auto py-0.5 text-xs font-semibold">
@@ -504,20 +569,26 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-4 text-xs font-medium text-gray-500">
-          <span>Active Questions: <strong id="stat-active-q" class="text-gray-900 dark:text-white">0</strong></span>
-          <span>Mastery: <strong id="stat-avg-accuracy" class="text-emerald-600 font-bold">0%</strong></span>
+        <div class="flex items-center gap-3">
+          <!-- 2.2 PRINTABLE WEAKNESS SHEET BUTTON -->
+          <button onclick="app.printWeaknessSheet()" title="Generate printable A4 revision paper of your active mistakes" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-ms-blue"></i>
+            <span>Print Test Sheet</span>
+          </button>
+          <div class="text-xs font-medium text-gray-500">
+            <span>Active: <strong id="stat-active-q" class="text-gray-900 dark:text-white">0</strong></span>
+          </div>
         </div>
       </div>
 
       <!-- Ledger Cards Grid with Visual Thumbnails & IDs -->
-      <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 print-grid">
         <!-- Rendered via JS -->
       </div>
 
     </section>
 
-    <!-- VIEW 4: CLOUD & SCHEDULE SETTINGS -->
+    <!-- VIEW 4: CLOUD & SCHEDULE SETTINGS (FULLY RESTORED TIME PICKERS & LABELS) -->
     <section id="view-settings" class="hidden max-w-4xl mx-auto space-y-6">
       
       <!-- Supabase Cloud Sync Card -->
@@ -565,7 +636,7 @@
 
       </div>
 
-      <!-- Restored 3 Daily Scheduled Review Slots & Schedule Management -->
+      <!-- RESTORED 3 DAILY REVIEW SLOTS & TIME PICKERS -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
         <div>
           <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Schedule</h3>
@@ -586,7 +657,7 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
             </div>
           </div>
 
@@ -602,7 +673,7 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
             </div>
           </div>
 
@@ -618,7 +689,7 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
+              <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
             </div>
           </div>
 
@@ -679,7 +750,7 @@
   </main>
 
   <!-- ================= DEDICATED INSPECT MODAL ================= -->
-  <div id="modal-preview" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
+  <div id="modal-preview" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4 no-print">
     <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto custom-scrollbar border border-gray-200 dark:border-gray-700 shadow-2xl p-6 sm:p-8 space-y-6">
       
       <div class="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
@@ -689,6 +760,7 @@
             <span id="prev-modal-subject" class="text-xs font-bold uppercase text-gray-500">Physics</span>
             <span id="prev-modal-grad-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">🎓 Mastered</span>
             <span id="prev-modal-star-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800">★ High-Yield</span>
+            <span id="prev-modal-test-badge" class="hidden text-xs font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-800">#Mock</span>
           </div>
           <h3 id="prev-modal-chapter" class="text-lg font-bold text-gray-900 dark:text-white mt-1">Topic Name</h3>
         </div>
@@ -745,7 +817,7 @@
   </div>
 
   <!-- ================= IMAGE ZOOM MODAL ================= -->
-  <div id="modal-zoom" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4">
+  <div id="modal-zoom" class="hidden fixed inset-0 z-50 bg-black/80 acrylic flex items-center justify-center p-4 no-print">
     <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
       <button onclick="app.closeZoomModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 p-2 text-sm font-bold flex items-center gap-1">
         <i data-lucide="x" class="w-5 h-5"></i> Close
@@ -755,7 +827,7 @@
   </div>
 
   <!-- ================= FLUENT TOAST ================= -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none no-print">
     <div class="bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-gray-700 text-sm">
       <i data-lucide="info" class="w-4 h-4 text-ms-blue" id="toast-icon"></i>
       <span id="toast-message">Notification message</span>
@@ -782,8 +854,10 @@
           allocatedTime: 120,
           quickKey: 'Option B / 3.27 m/s²',
           error_tag: 'Calculation Slip',
+          test_source: '#AIATS-01',
           is_starred: true,
           graduated: false,
+          last_failed_at: 0,
           shotA: sampleQuestionA,
           shotB: sampleSolutionA,
           attempts: { total: 3, correct: 1, incorrect: 2, gaveUp: 0 },
@@ -797,6 +871,7 @@
       timeRemaining: 0,
       timeElapsed: 0,
       isOvertime: false,
+      isFlashMode: false,
       currentSlot: 'morning',
       currentBankFilter: 'ALL',
       sbClient: null,
@@ -825,6 +900,8 @@
           }
           if (q.is_starred === undefined) q.is_starred = false;
           if (q.graduated === undefined) q.graduated = false;
+          if (q.test_source === undefined) q.test_source = '';
+          if (q.last_failed_at === undefined) q.last_failed_at = 0;
         });
         if (changed) this.saveBankToStorage(false);
       },
@@ -928,7 +1005,9 @@
             history: newRow.history || [],
             is_starred: newRow.is_starred || false,
             graduated: newRow.graduated || false,
-            error_tag: newRow.error_tag || ''
+            error_tag: newRow.error_tag || '',
+            test_source: newRow.test_source || '',
+            last_failed_at: newRow.last_failed_at || 0
           };
           if (idx !== -1) {
             this.questionBank[idx] = mapped;
@@ -967,7 +1046,9 @@
             history: q.history || [],
             is_starred: q.is_starred || false,
             graduated: q.graduated || false,
-            error_tag: q.error_tag || ''
+            error_tag: q.error_tag || '',
+            test_source: q.test_source || '',
+            last_failed_at: q.last_failed_at || 0
           }));
           this.saveBankToStorage(false);
           this.renderBankTable();
@@ -995,6 +1076,8 @@
           is_starred: q.is_starred || false,
           graduated: q.graduated || false,
           error_tag: q.error_tag || '',
+          test_source: q.test_source || '',
+          last_failed_at: q.last_failed_at || 0,
           updated_at: new Date().toISOString()
         });
       },
@@ -1021,6 +1104,8 @@
           is_starred: q.is_starred || false,
           graduated: q.graduated || false,
           error_tag: q.error_tag || '',
+          test_source: q.test_source || '',
+          last_failed_at: q.last_failed_at || 0,
           updated_at: new Date().toISOString()
         }));
 
@@ -1050,7 +1135,6 @@
         };
         activeBtn.className = `sub-pill flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border ${colors[subj]} text-xs transition shadow-sm`;
 
-        // Pacing: Bio recall (45s), Chem (60s), Physics scratch (120s)
         const timerInput = document.getElementById('ingest-timer');
         if (subj === 'Botany' || subj === 'Zoology') timerInput.value = 45;
         else if (subj === 'Chemistry') timerInput.value = 60;
@@ -1067,7 +1151,7 @@
         else if (subj === 'Chemistry') base = 60;
         else if (subj === 'Physics') base = 120;
 
-        if (diff === 'Easy') timerInput.value = Math.max(30, Math.round(base * 0.75));
+        if (diff === 'Easy') timerInput.value = Math.max(20, Math.round(base * 0.75));
         else if (diff === 'Medium') timerInput.value = base;
         else if (diff === 'Hard') timerInput.value = Math.round(base * 1.5);
       },
@@ -1082,6 +1166,28 @@
             btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
           }
         });
+      },
+
+      // 1.2 RAPID FLASH MODE (15s Mental Drill)
+      toggleFlashMode() {
+        this.isFlashMode = !this.isFlashMode;
+        const btn = document.getElementById('flash-mode-btn');
+        const label = document.getElementById('flash-mode-label');
+        if (this.isFlashMode) {
+          btn.className = 'px-2.5 py-1.5 rounded-lg border border-amber-400 bg-amber-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition';
+          label.textContent = 'Flash: ON (15s)';
+          this.showToast('⚡ Flash Mode ON: 15s mental recall drill!');
+          if (this.currentReviewQueue.length > 0) this.startCardTimer(15);
+        } else {
+          btn.className = 'px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-bold flex items-center gap-1 transition';
+          label.textContent = 'Flash: Off';
+          this.showToast('Standard solve timer restored.');
+          if (this.currentReviewQueue.length > 0) {
+            const q = this.currentReviewQueue[this.currentCardIndex];
+            this.startCardTimer(q.allocatedTime || 120);
+          }
+        }
+        lucide.createIcons();
       },
 
       toggleStar(id) {
@@ -1146,6 +1252,7 @@
         if (currentQ) this.deleteQuestion(currentQ.id);
       },
 
+      // 1.1 BLIND RE-TEST LOCKOUT & REVIEW SHUFFLER
       launchSlotReview(slot) {
         this.currentSlot = slot;
         const quotaMap = {
@@ -1170,11 +1277,23 @@
           return;
         }
 
+        // 1.1 BLIND RE-TEST LOCKOUT: Filter out questions failed in last 12 hours
+        const now = Date.now();
+        const twelveHoursMs = 12 * 60 * 60 * 1000;
+        const coolingEligible = activePool.filter(q => !q.last_failed_at || (now - q.last_failed_at > twelveHoursMs));
+        
+        // Fallback to activePool if all items are currently in cooling-off
+        const poolToUse = coolingEligible.length > 0 ? coolingEligible : activePool;
+        if (coolingEligible.length < activePool.length && coolingEligible.length > 0) {
+          const lockedCount = activePool.length - coolingEligible.length;
+          this.showToast(`🔒 ${lockedCount} failed cards in 12h cooling-off lockout for long-term retention.`);
+        }
+
         document.getElementById('review-active-panel').classList.remove('hidden');
         document.getElementById('review-complete-panel').classList.add('hidden');
 
         // Failure-Weighted Shuffle Algorithm
-        const weightedPool = activePool.map(q => {
+        const weightedPool = poolToUse.map(q => {
           const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
           const starBoost = q.is_starred ? 3 : 0;
           return { item: q, weight: 1 + (failureCount * 2.5) + starBoost };
@@ -1243,12 +1362,22 @@
         document.getElementById('review-chapter-badge').textContent = q.chapter;
         document.getElementById('review-difficulty-badge').textContent = q.difficulty || 'Medium';
 
+        // Error tag badge
         const errBadge = document.getElementById('review-errortag-badge');
         if (q.error_tag) {
           errBadge.textContent = q.error_tag;
           errBadge.classList.remove('hidden');
         } else {
           errBadge.classList.add('hidden');
+        }
+
+        // Test source badge
+        const testBadge = document.getElementById('review-testtag-badge');
+        if (q.test_source) {
+          testBadge.textContent = q.test_source;
+          testBadge.classList.remove('hidden');
+        } else {
+          testBadge.classList.add('hidden');
         }
 
         document.getElementById('review-current-index').textContent = this.currentCardIndex + 1;
@@ -1264,7 +1393,10 @@
         document.getElementById('review-quick-key').textContent = q.quickKey || 'Full working in Shot B';
 
         this.updateCurrentStarBtnUI(q.is_starred);
-        this.startCardTimer(q.allocatedTime || 120);
+        
+        // Timer duration (15s if flash mode, else allocatedTime)
+        const duration = this.isFlashMode ? 15 : (q.allocatedTime || 120);
+        this.startCardTimer(duration);
         lucide.createIcons();
       },
 
@@ -1277,7 +1409,7 @@
         const display = document.getElementById('timer-display');
         const fill = document.getElementById('timer-progress-fill');
         const label = document.getElementById('timer-status-label');
-        label.textContent = 'Time Remaining';
+        label.textContent = this.isFlashMode ? 'Flash Pacing' : 'Time Remaining';
         label.className = 'text-[10px] uppercase font-bold text-gray-400';
         display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
         fill.className = 'h-full bg-ms-blue transition-all duration-300';
@@ -1291,7 +1423,7 @@
             this.updateTimerUI(this.timeRemaining, seconds);
 
             if (this.timeRemaining <= 0) {
-              isOvertime = true;
+              this.isOvertime = true;
               label.textContent = 'Overtime Recorded';
               label.className = 'text-[10px] uppercase font-bold text-red-500 animate-pulse';
               display.className = 'font-mono text-2xl font-bold tracking-tight text-red-500 animate-pulse';
@@ -1352,25 +1484,27 @@
             q.attempts.correct = (q.attempts.correct || 0) + 1;
             q.history.push('✅');
 
-            // RULE OF 3 CHECK: Did it log 3 consecutive correct marks?
+            // RULE OF 3 CHECK
             const lastThree = q.history.slice(-3);
             if (lastThree.length === 3 && lastThree.every(h => h === '✅')) {
               q.graduated = true;
-              this.showToast('🎓 Mastered! Graduated from daily queue.', 'award');
+              this.showToast('🎓 Mastered! Graduated from daily queue (+5 marks saved).', 'award');
             } else {
               this.showToast(`Logged Correct! Streak: ${lastThree.filter(h => h === '✅').length}/3`, 'check');
             }
           } else {
-            // Relapse failsafe: drops graduation if failed
+            // Relapse & 12-Hour Lockout timestamp
             q.graduated = false;
+            q.last_failed_at = Date.now();
+            
             if (didGiveUp) {
               q.attempts.gaveUp = (q.attempts.gaveUp || 0) + 1;
               q.history.push('🏳️');
-              this.showToast('Logged as Gave Up. Prioritized in queue.');
+              this.showToast('Logged as Gave Up (Locked for 12h cooling-off).');
             } else {
               q.attempts.incorrect = (q.attempts.incorrect || 0) + 1;
               q.history.push('❌');
-              this.showToast('Incorrect logged. Boosted in future shuffles.');
+              this.showToast('Incorrect logged (12h cooling-off active).');
             }
           }
 
@@ -1419,7 +1553,7 @@
         const q = this.currentReviewQueue[this.currentCardIndex];
         const hintBox = document.getElementById('hint-container');
         const hintText = document.getElementById('hint-text');
-        hintText.textContent = `Focus on the core principle in ${q.chapter}. Setup the governing equation/formula before substituting values.`;
+        hintText.textContent = `Focus on the foundational principle in ${q.chapter}. Setup the governing formula/balance before substituting variables.`;
         hintBox.classList.remove('hidden');
         lucide.createIcons();
       },
@@ -1510,10 +1644,12 @@
           chapter: document.getElementById('ingest-chapter').value.trim(),
           difficulty: document.getElementById('ingest-difficulty').value,
           allocatedTime: parseInt(document.getElementById('ingest-timer').value) || 60,
+          test_source: document.getElementById('ingest-test-source').value.trim(),
           quickKey: document.getElementById('ingest-quick-key').value.trim() || 'See Solution Derivation',
           error_tag: document.getElementById('ingest-error-tag').value.trim(),
           is_starred: false,
           graduated: false,
+          last_failed_at: 0,
           shotA: this.uploadedShotA,
           shotB: this.uploadedShotB,
           attempts: { total: 0, correct: 0, incorrect: 0, gaveUp: 0 },
@@ -1558,12 +1694,34 @@
         document.getElementById('stat-graduated-badge').textContent = `${gradCount} Mastered`;
         document.getElementById('badge-starred-count').textContent = starCount;
 
+        // 3.2 MARKS SALVAGED CALCULATION (+5 per graduated card)
+        const marksSalvaged = gradCount * 5;
+        document.getElementById('stat-marks-salvaged').textContent = `+${marksSalvaged} Marks`;
+
+        // 3.1 UPDATE ROOT CAUSE LEAKAGE MATRIX
+        this.updateLeakageMatrix();
+
         if (this.questionBank.length > 0) {
           const totalAttempts = this.questionBank.reduce((acc, q) => acc + (q.attempts.total || 0), 0);
           const totalCorrect = this.questionBank.reduce((acc, q) => acc + (q.attempts.correct || 0), 0);
           const avg = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
           document.getElementById('stat-avg-accuracy').textContent = `${avg}%`;
         }
+      },
+
+      updateLeakageMatrix() {
+        const taggedQuestions = this.questionBank.filter(q => q.error_tag);
+        const total = taggedQuestions.length || 1;
+
+        const calcCount = taggedQuestions.filter(q => q.error_tag === 'Calculation Slip').length;
+        const ncertCount = taggedQuestions.filter(q => q.error_tag === 'NCERT Line').length;
+        const conceptCount = taggedQuestions.filter(q => q.error_tag === 'Concept Blank').length;
+        const trapCount = taggedQuestions.filter(q => q.error_tag === 'Question Trap').length;
+
+        document.getElementById('leak-calc').textContent = `${Math.round((calcCount / total) * 100)}% (${calcCount})`;
+        document.getElementById('leak-ncert').textContent = `${Math.round((ncertCount / total) * 100)}% (${ncertCount})`;
+        document.getElementById('leak-concept').textContent = `${Math.round((conceptCount / total) * 100)}% (${conceptCount})`;
+        document.getElementById('leak-trap').textContent = `${Math.round((trapCount / total) * 100)}% (${trapCount})`;
       },
 
       setBankFilter(f) {
@@ -1576,6 +1734,12 @@
         this.renderBankTable();
       },
 
+      // 2.2 PRINTABLE SUNDAY WEAKNESS SHEET
+      printWeaknessSheet() {
+        this.showToast('Preparing printable 2-column examination sheet...');
+        setTimeout(() => window.print(), 400);
+      },
+
       renderBankTable() {
         const grid = document.getElementById('bank-grid');
         const search = document.getElementById('bank-search').value.toLowerCase();
@@ -1583,7 +1747,8 @@
 
         const filtered = this.questionBank.filter(q => {
           const qid = (q.displayId || '').toLowerCase();
-          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search) || qid.includes(search);
+          const testTag = (q.test_source || '').toLowerCase();
+          const matchSearch = q.subject.toLowerCase().includes(search) || q.chapter.toLowerCase().includes(search) || qid.includes(search) || testTag.includes(search);
           
           let matchFilter = true;
           if (f === 'STARRED') matchFilter = q.is_starred === true;
@@ -1606,17 +1771,18 @@
         };
 
         grid.innerHTML = filtered.map(q => `
-          <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl border ${q.is_starred ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-gray-200 dark:border-gray-800'} shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
+          <div class="print-card bg-white dark:bg-[#1E1E1E] rounded-2xl border ${q.is_starred ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-gray-200 dark:border-gray-800'} shadow-sm hover:shadow-md transition overflow-hidden flex flex-col justify-between group">
             
             <div onclick="app.openPreviewModal('${q.id}')" class="relative bg-gray-50 dark:bg-black/30 h-36 border-b border-gray-100 dark:border-gray-800 overflow-hidden cursor-pointer flex items-center justify-center">
               <img src="${q.shotA}" class="h-full w-full object-contain p-2 group-hover:scale-105 transition duration-200" alt="Preview">
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
+              <div class="no-print absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1.5 backdrop-blur-[2px]">
                 <i data-lucide="eye" class="w-4 h-4"></i> Inspect
               </div>
               <span class="absolute top-2 left-2 font-mono text-[10px] font-bold text-ms-blue bg-white/95 dark:bg-gray-900/95 px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-900">
                 ${q.displayId || '#Q'}
               </span>
               ${q.graduated ? '<span class="absolute top-2 right-2 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded shadow-sm">🎓 Mastered</span>' : ''}
+              ${q.test_source ? `<span class="absolute bottom-2 right-2 text-[10px] font-bold bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded shadow-sm">\${q.test_source}</span>` : ''}
             </div>
 
             <div class="p-3.5 space-y-2">
@@ -1628,7 +1794,7 @@
               ${q.error_tag ? `<div class="text-[11px] text-gray-400 truncate">Tag: <span class="font-semibold text-ms-blue">\${q.error_tag}</span></div>` : ''}
             </div>
 
-            <div class="px-3.5 py-2.5 bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+            <div class="no-print px-3.5 py-2.5 bg-gray-50/60 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
               <span class="font-mono text-gray-600 dark:text-gray-400 text-[11px]">${(q.history || []).slice(-3).join(' ') || 'Fresh'}</span>
               <div class="flex items-center gap-1.5">
                 <span class="font-bold mr-1 ${q.accuracy >= 60 ? 'text-emerald-600' : 'text-amber-600'}">${q.accuracy}%</span>
@@ -1665,6 +1831,14 @@
         const starBadge = document.getElementById('prev-modal-star-badge');
         if (q.is_starred) starBadge.classList.remove('hidden');
         else starBadge.classList.add('hidden');
+
+        const testBadge = document.getElementById('prev-modal-test-badge');
+        if (q.test_source) {
+          testBadge.textContent = q.test_source;
+          testBadge.classList.remove('hidden');
+        } else {
+          testBadge.classList.add('hidden');
+        }
 
         document.getElementById('prev-modal-shot-a').src = q.shotA;
         document.getElementById('prev-modal-shot-b').src = q.shotB;
