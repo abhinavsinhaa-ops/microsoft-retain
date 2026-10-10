@@ -130,19 +130,16 @@
 
       <!-- Right Controls: Net Marks Salvaged (+5 Swing) & Streak -->
       <div class="flex items-center gap-2">
-        <!-- Marks Salvaged Counter -->
         <div title="Net Score Swing: +5 marks per converted mistake" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">
           <i data-lucide="target" class="w-3.5 h-3.5 text-emerald-600"></i>
           <span id="stat-marks-salvaged">+0 Marks</span>
         </div>
 
-        <!-- Mastered Badge -->
         <div class="hidden sm:flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-950/40 text-ms-blue rounded-md text-xs font-semibold border border-blue-200 dark:border-blue-800">
           <i data-lucide="award" class="w-3.5 h-3.5"></i>
           <span id="stat-graduated-badge">0 Mastered</span>
         </div>
 
-        <!-- Dark Mode Toggle -->
         <button onclick="app.toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition">
           <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
@@ -175,10 +172,8 @@
     <!-- VIEW 1: ACTIVE REVIEW SESSION -->
     <section id="view-review" class="space-y-6">
       
-      <!-- Container for Active Question Card -->
       <div id="review-active-panel" class="space-y-6">
         
-        <!-- Session Header Bar -->
         <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div class="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
@@ -201,15 +196,12 @@
             </div>
           </div>
 
-          <!-- Dynamic Timer & Flash / Star / Delete Controls -->
           <div class="flex items-center gap-2">
-            <!-- Rapid Flash Mode Toggle (15-Second Drill) -->
             <button onclick="app.toggleFlashMode()" id="flash-mode-btn" title="Toggle 15s Rapid Flash Mode (Mental Recall)" class="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 text-xs font-bold flex items-center gap-1 transition">
               <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
               <span id="flash-mode-label">Flash: Off</span>
             </button>
 
-            <!-- Timer Display -->
             <div class="text-right">
               <div class="text-[10px] uppercase font-bold text-gray-400" id="timer-status-label">Time Remaining</div>
               <div class="font-mono text-2xl font-bold tracking-tight text-ms-blue" id="timer-display">02:00</div>
@@ -218,19 +210,16 @@
               <i data-lucide="clock" class="w-5 h-5"></i>
             </div>
             
-            <!-- Quick Star Button -->
             <button onclick="app.toggleCurrentStar()" id="review-star-btn" title="Toggle High-Yield Star" class="p-2 text-gray-400 hover:text-amber-500 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/40 transition">
               <i data-lucide="star" class="w-5 h-5"></i>
             </button>
             
-            <!-- Quick Delete Button -->
             <button onclick="app.deleteCurrentQuestion()" title="Permanently delete this question" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <!-- Question & Solution Viewport Card -->
         <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 overflow-hidden">
           
           <div class="w-full bg-gray-100 dark:bg-gray-800 h-1.5 overflow-hidden">
@@ -239,7 +228,6 @@
 
           <div class="p-6 sm:p-8 space-y-6">
             
-            <!-- STAGE 1: SHOT A (Question Image) -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
@@ -255,7 +243,6 @@
               </div>
             </div>
 
-            <!-- Socratic Hint Box -->
             <div id="hint-container" class="hidden p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-sm">
               <div class="flex items-start gap-3">
                 <i data-lucide="sparkles" class="w-5 h-5 text-ms-blue mt-0.5 shrink-0"></i>
@@ -266,7 +253,6 @@
               </div>
             </div>
 
-            <!-- ACTION BAR 1: SOLVING CONTROLS -->
             <div id="action-bar-solving" class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
               <div class="flex items-center gap-2">
                 <button onclick="app.requestHint()" class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium flex items-center gap-1.5 transition">
@@ -283,7 +269,6 @@
               </button>
             </div>
 
-            <!-- STAGE 2: VERIFICATION & SELF-GRADING BAR -->
             <div id="verification-panel" class="hidden space-y-6 pt-6 border-t-2 border-dashed border-gray-200 dark:border-gray-800">
               
               <div class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
@@ -302,7 +287,6 @@
                 </div>
               </div>
 
-              <!-- SHOT B: Full Solution Derivation -->
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
@@ -318,7 +302,6 @@
                 </div>
               </div>
 
-              <!-- Self-Grading Buttons -->
               <div class="p-5 rounded-2xl bg-blue-50/50 dark:bg-gray-800/50 border border-blue-100 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h4 class="font-bold text-sm text-gray-900 dark:text-white">Compare your rough work with the key</h4>
@@ -341,7 +324,6 @@
 
       </div>
 
-      <!-- ================= COMPLETION SUMMARY SCREEN ================= -->
       <div id="review-complete-panel" class="hidden max-w-xl mx-auto bg-white dark:bg-[#1E1E1E] rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-800 text-center space-y-6 my-8">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
           <i data-lucide="award" class="w-8 h-8"></i>
@@ -372,21 +354,29 @@
 
     </section>
 
-    <!-- VIEW 2: FAST DUAL-SHOT INGESTION (15-SECOND CAPTURE) -->
+    <!-- VIEW 2: DUAL-SHOT INGESTION (WITH POST-MOCK BULK RAPID INGESTION) -->
     <section id="view-ingest" class="hidden max-w-3xl mx-auto space-y-6">
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800">
         
-        <div class="flex items-center justify-between pb-6 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex flex-wrap items-center justify-between pb-6 border-b border-gray-100 dark:border-gray-800 gap-3">
           <div class="flex items-center gap-3">
             <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-ms-blue">
               <i data-lucide="camera" class="w-6 h-6"></i>
             </div>
             <div>
               <h2 class="text-xl font-bold">Log New Mistake</h2>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Tap subject, drop screenshots, and save. Takes 15 seconds.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Capture errors in 15 seconds.</p>
             </div>
           </div>
-          <span class="text-[11px] font-mono text-gray-400">Auto-ID Assignment</span>
+          
+          <!-- CONTINUOUS RAPID INGESTION TOGGLE (POST-MOCK BULK MODE) -->
+          <div class="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-800/80 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
+            <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-300 select-none">
+              <input type="checkbox" id="ingest-bulk-mode" onchange="app.toggleBulkModeUI()" class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
+              <span>⚡ Continuous Mock Mode</span>
+            </label>
+            <span id="bulk-batch-counter" class="hidden text-[10px] font-bold bg-ms-blue text-white px-2 py-0.5 rounded-full">0 Logged</span>
+          </div>
         </div>
 
         <form id="ingest-form" onsubmit="app.saveNewQuestion(event)" class="mt-6 space-y-5">
@@ -438,7 +428,7 @@
           <!-- Test Batch / Mock Source & Quick Answer Key -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mock / Test Batch Tag (Optional)</label>
+              <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Mock / Test Batch Tag (Sticky in Continuous Mode)</label>
               <input type="text" id="ingest-test-source" placeholder="e.g., #AIATS-03 or #Allen-Major-02" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
             </div>
             <div>
@@ -469,7 +459,6 @@
 
           <!-- FAST DUAL-SHOT DROPZONES -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            <!-- Shot A -->
             <div class="space-y-1.5">
               <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
                 <span>Shot A: Question *</span>
@@ -488,7 +477,6 @@
               </div>
             </div>
 
-            <!-- Shot B -->
             <div class="space-y-1.5">
               <span class="text-xs font-bold uppercase text-gray-700 dark:text-gray-300 flex items-center justify-between">
                 <span>Shot B: Solution Derivation *</span>
@@ -508,8 +496,11 @@
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+          <div class="flex items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <button type="button" id="bulk-done-btn" onclick="app.finishBulkBatch()" class="hidden px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 transition">
+              Finish Batch & View Ledger
+            </button>
+            <button type="submit" id="ingest-submit-btn" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-ms-blue hover:bg-ms-hover text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-sm ml-auto">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Save Mistake & Sync
             </button>
           </div>
@@ -522,7 +513,6 @@
     <!-- VIEW 3: PERFORMANCE LEDGER & ROOT CAUSE MATRIX -->
     <section id="view-bank" class="hidden space-y-6">
       
-      <!-- 3.1 ROOT CAUSE LEAKAGE MATRIX DIAGNOSTIC CARD -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm space-y-3 no-print">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -551,13 +541,11 @@
         </div>
       </div>
 
-      <!-- Filters & Printable Sunday Sheet Action -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4 no-print">
         
         <div class="flex items-center gap-2 flex-wrap">
           <input type="text" id="bank-search" oninput="app.renderBankTable()" placeholder="Search ID, topic, #Mock..." class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none w-48 sm:w-56">
           
-          <!-- Subject & Status Chips -->
           <div class="flex items-center gap-1 overflow-x-auto py-0.5 text-xs font-semibold">
             <button onclick="app.setBankFilter('ALL')" id="filter-chip-ALL" class="px-2.5 py-1 rounded-full bg-ms-blue text-white transition">All</button>
             <button onclick="app.setBankFilter('Physics')" id="filter-chip-Physics" class="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 transition">⚛️ Physics</button>
@@ -570,7 +558,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- 2.2 PRINTABLE WEAKNESS SHEET BUTTON -->
           <button onclick="app.printWeaknessSheet()" title="Generate printable A4 revision paper of your active mistakes" class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-semibold flex items-center gap-1.5 transition">
             <i data-lucide="printer" class="w-3.5 h-3.5 text-ms-blue"></i>
             <span>Print Test Sheet</span>
@@ -581,17 +568,15 @@
         </div>
       </div>
 
-      <!-- Ledger Cards Grid with Visual Thumbnails & IDs -->
       <div id="bank-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 print-grid">
         <!-- Rendered via JS -->
       </div>
 
     </section>
 
-    <!-- VIEW 4: CLOUD & SCHEDULE SETTINGS (FULLY RESTORED TIME PICKERS & LABELS) -->
+    <!-- VIEW 4: CLOUD & SCHEDULE SETTINGS -->
     <section id="view-settings" class="hidden max-w-4xl mx-auto space-y-6">
       
-      <!-- Supabase Cloud Sync Card -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
         
         <div class="flex items-start justify-between gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
@@ -636,7 +621,7 @@
 
       </div>
 
-      <!-- RESTORED 3 DAILY REVIEW SLOTS & TIME PICKERS -->
+      <!-- Restored 3 Daily Review Slots & Schedule Management -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
         <div>
           <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Schedule</h3>
@@ -645,7 +630,6 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           
-          <!-- Morning Slot -->
           <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
             <div class="flex items-center justify-between">
               <span class="font-bold text-sm flex items-center gap-1.5">☀️ Morning Slot</span>
@@ -657,11 +641,10 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+              <input type="number" id="cfg-quota-morning" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
             </div>
           </div>
 
-          <!-- Midday Slot -->
           <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
             <div class="flex items-center justify-between">
               <span class="font-bold text-sm flex items-center gap-1.5">🌤️ Midday Slot</span>
@@ -673,11 +656,10 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+              <input type="number" id="cfg-quota-midday" value="10" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
             </div>
           </div>
 
-          <!-- Evening Slot -->
           <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 space-y-3">
             <div class="flex items-center justify-between">
               <span class="font-bold text-sm flex items-center gap-1.5">🌙 Evening Slot</span>
@@ -689,7 +671,7 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1">Batch Quota (Questions)</label>
-              <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm focus:border-ms-blue outline-none">
+              <input type="number" id="cfg-quota-evening" value="20" min="1" max="50" onchange="app.saveScheduleConfig()" class="w-full px-2.5 py-1.5 rounded border border-gray-300 dark:border-gray-700 bg-transparent text-sm">
             </div>
           </div>
 
@@ -872,6 +854,7 @@
       timeElapsed: 0,
       isOvertime: false,
       isFlashMode: false,
+      bulkBatchCount: 0,
       currentSlot: 'morning',
       currentBankFilter: 'ALL',
       sbClient: null,
@@ -1119,7 +1102,6 @@
         }
       },
 
-      // 1-Tap Subject Selector with Automatic NEET Exam Pacing
       selectSubject(subj) {
         document.getElementById('ingest-subject').value = subj;
         document.querySelectorAll('.sub-pill').forEach(btn => {
@@ -1168,7 +1150,6 @@
         });
       },
 
-      // 1.2 RAPID FLASH MODE (15s Mental Drill)
       toggleFlashMode() {
         this.isFlashMode = !this.isFlashMode;
         const btn = document.getElementById('flash-mode-btn');
@@ -1252,7 +1233,6 @@
         if (currentQ) this.deleteQuestion(currentQ.id);
       },
 
-      // 1.1 BLIND RE-TEST LOCKOUT & REVIEW SHUFFLER
       launchSlotReview(slot) {
         this.currentSlot = slot;
         const quotaMap = {
@@ -1262,7 +1242,6 @@
         };
         const quota = quotaMap[slot] || 10;
 
-        // RULE OF 3: Exclude auto-graduated mastered cards from daily batch
         const activePool = this.questionBank.filter(q => !q.graduated);
 
         if (activePool.length === 0) {
@@ -1277,22 +1256,19 @@
           return;
         }
 
-        // 1.1 BLIND RE-TEST LOCKOUT: Filter out questions failed in last 12 hours
         const now = Date.now();
         const twelveHoursMs = 12 * 60 * 60 * 1000;
         const coolingEligible = activePool.filter(q => !q.last_failed_at || (now - q.last_failed_at > twelveHoursMs));
         
-        // Fallback to activePool if all items are currently in cooling-off
         const poolToUse = coolingEligible.length > 0 ? coolingEligible : activePool;
         if (coolingEligible.length < activePool.length && coolingEligible.length > 0) {
           const lockedCount = activePool.length - coolingEligible.length;
-          this.showToast(`🔒 ${lockedCount} failed cards in 12h cooling-off lockout for long-term retention.`);
+          this.showToast(`🔒 ${lockedCount} cards in 12h cooling lockout for retention.`);
         }
 
         document.getElementById('review-active-panel').classList.remove('hidden');
         document.getElementById('review-complete-panel').classList.add('hidden');
 
-        // Failure-Weighted Shuffle Algorithm
         const weightedPool = poolToUse.map(q => {
           const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
           const starBoost = q.is_starred ? 3 : 0;
@@ -1362,7 +1338,6 @@
         document.getElementById('review-chapter-badge').textContent = q.chapter;
         document.getElementById('review-difficulty-badge').textContent = q.difficulty || 'Medium';
 
-        // Error tag badge
         const errBadge = document.getElementById('review-errortag-badge');
         if (q.error_tag) {
           errBadge.textContent = q.error_tag;
@@ -1371,7 +1346,6 @@
           errBadge.classList.add('hidden');
         }
 
-        // Test source badge
         const testBadge = document.getElementById('review-testtag-badge');
         if (q.test_source) {
           testBadge.textContent = q.test_source;
@@ -1394,7 +1368,6 @@
 
         this.updateCurrentStarBtnUI(q.is_starred);
         
-        // Timer duration (15s if flash mode, else allocatedTime)
         const duration = this.isFlashMode ? 15 : (q.allocatedTime || 120);
         this.startCardTimer(duration);
         lucide.createIcons();
@@ -1484,7 +1457,6 @@
             q.attempts.correct = (q.attempts.correct || 0) + 1;
             q.history.push('✅');
 
-            // RULE OF 3 CHECK
             const lastThree = q.history.slice(-3);
             if (lastThree.length === 3 && lastThree.every(h => h === '✅')) {
               q.graduated = true;
@@ -1493,7 +1465,6 @@
               this.showToast(`Logged Correct! Streak: ${lastThree.filter(h => h === '✅').length}/3`, 'check');
             }
           } else {
-            // Relapse & 12-Hour Lockout timestamp
             q.graduated = false;
             q.last_failed_at = Date.now();
             
@@ -1626,6 +1597,32 @@
         reader.readAsDataURL(file);
       },
 
+      toggleBulkModeUI() {
+        const isBulk = document.getElementById('ingest-bulk-mode').checked;
+        const counter = document.getElementById('bulk-batch-counter');
+        const doneBtn = document.getElementById('bulk-done-btn');
+        if (isBulk) {
+          counter.classList.remove('hidden');
+          counter.textContent = `${this.bulkBatchCount} Logged`;
+          if (this.bulkBatchCount > 0) doneBtn.classList.remove('hidden');
+          this.showToast('⚡ Continuous Mode ON: Subject & Mock tags stay locked between questions!');
+        } else {
+          counter.classList.add('hidden');
+          doneBtn.classList.add('hidden');
+        }
+      },
+
+      finishBulkBatch() {
+        const total = this.bulkBatchCount;
+        this.bulkBatchCount = 0;
+        document.getElementById('bulk-batch-counter').classList.add('hidden');
+        document.getElementById('bulk-done-btn').classList.add('hidden');
+        document.getElementById('ingest-bulk-mode').checked = false;
+        document.getElementById('ingest-form').reset();
+        this.switchTab('bank');
+        this.showToast(`🎉 Batch complete! Logged ${total} test mistakes to ledger.`);
+      },
+
       saveNewQuestion(e) {
         e.preventDefault();
         if (!this.uploadedShotA || !this.uploadedShotB) {
@@ -1636,6 +1633,7 @@
         const subj = document.getElementById('ingest-subject').value.trim();
         const prefix = (subj || 'Q').slice(0, 3).toUpperCase();
         const displayId = `#${prefix}-${String(this.questionBank.length + 1).padStart(3, '0')}`;
+        const isBulk = document.getElementById('ingest-bulk-mode').checked;
 
         const newQ = {
           id: 'q_' + Date.now(),
@@ -1659,21 +1657,47 @@
 
         this.questionBank.unshift(newQ);
         this.saveBankToStorage(true, newQ);
-        this.showToast(`Saved ${displayId} (${subj})!`);
 
-        document.getElementById('ingest-form').reset();
-        this.uploadedShotA = null;
-        this.uploadedShotB = null;
-        document.getElementById('placeholder-box-a').classList.remove('hidden');
-        document.getElementById('preview-box-a').classList.add('hidden');
-        document.getElementById('placeholder-box-b').classList.remove('hidden');
-        document.getElementById('preview-box-b').classList.add('hidden');
-        document.getElementById('ingest-error-tag').value = '';
-        document.querySelectorAll('.err-chip').forEach(btn => {
-          btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
-        });
+        // CONTINUOUS INGESTION LOGIC
+        if (isBulk) {
+          this.bulkBatchCount++;
+          const counter = document.getElementById('bulk-batch-counter');
+          counter.classList.remove('hidden');
+          counter.textContent = `${this.bulkBatchCount} Logged`;
+          document.getElementById('bulk-done-btn').classList.remove('hidden');
 
-        this.switchTab('bank');
+          // Reset only card-specific inputs; retain subject & test tag!
+          document.getElementById('ingest-chapter').value = '';
+          document.getElementById('ingest-quick-key').value = '';
+          document.getElementById('ingest-error-tag').value = '';
+          document.querySelectorAll('.err-chip').forEach(btn => {
+            btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
+          });
+
+          this.uploadedShotA = null;
+          this.uploadedShotB = null;
+          document.getElementById('placeholder-box-a').classList.remove('hidden');
+          document.getElementById('preview-box-a').classList.add('hidden');
+          document.getElementById('placeholder-box-b').classList.remove('hidden');
+          document.getElementById('preview-box-b').classList.add('hidden');
+
+          document.getElementById('ingest-chapter').focus();
+          this.showToast(`⚡ Saved ${displayId}! Ready for #${this.bulkBatchCount + 1}`);
+        } else {
+          this.showToast(`Saved ${displayId} (${subj})!`);
+          document.getElementById('ingest-form').reset();
+          this.uploadedShotA = null;
+          this.uploadedShotB = null;
+          document.getElementById('placeholder-box-a').classList.remove('hidden');
+          document.getElementById('preview-box-a').classList.add('hidden');
+          document.getElementById('placeholder-box-b').classList.remove('hidden');
+          document.getElementById('preview-box-b').classList.add('hidden');
+          document.getElementById('ingest-error-tag').value = '';
+          document.querySelectorAll('.err-chip').forEach(btn => {
+            btn.className = 'err-chip px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 transition';
+          });
+          this.switchTab('bank');
+        }
       },
 
       saveBankToStorage(pushToCloud = false, questionToSync = null) {
@@ -1694,11 +1718,9 @@
         document.getElementById('stat-graduated-badge').textContent = `${gradCount} Mastered`;
         document.getElementById('badge-starred-count').textContent = starCount;
 
-        // 3.2 MARKS SALVAGED CALCULATION (+5 per graduated card)
         const marksSalvaged = gradCount * 5;
         document.getElementById('stat-marks-salvaged').textContent = `+${marksSalvaged} Marks`;
 
-        // 3.1 UPDATE ROOT CAUSE LEAKAGE MATRIX
         this.updateLeakageMatrix();
 
         if (this.questionBank.length > 0) {
@@ -1734,7 +1756,6 @@
         this.renderBankTable();
       },
 
-      // 2.2 PRINTABLE SUNDAY WEAKNESS SHEET
       printWeaknessSheet() {
         this.showToast('Preparing printable 2-column examination sheet...');
         setTimeout(() => window.print(), 400);
