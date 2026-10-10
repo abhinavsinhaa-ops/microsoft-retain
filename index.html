@@ -128,7 +128,7 @@
         </button>
       </div>
 
-      <!-- Right Controls: Net Marks Salvaged (+5 Swing) & Streak -->
+      <!-- Right Controls: Net Marks Salvaged & Theme -->
       <div class="flex items-center gap-2">
         <div title="Net Score Swing: +5 marks per converted mistake" class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">
           <i data-lucide="target" class="w-3.5 h-3.5 text-emerald-600"></i>
@@ -171,8 +171,89 @@
 
     <!-- VIEW 1: ACTIVE REVIEW SESSION -->
     <section id="view-review" class="space-y-6">
+
+      <!-- ================= 1. PRE-SESSION STAGING GATE (LOBBY) ================= -->
+      <div id="review-staging-panel" class="max-w-xl mx-auto bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6 my-6 text-center">
+        
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-ms-blue flex items-center justify-center shadow-inner">
+          <i data-lucide="play" class="w-8 h-8 fill-ms-blue"></i>
+        </div>
+
+        <div>
+          <h3 id="staging-slot-title" class="text-xl font-bold text-gray-900 dark:text-white">☀️ Morning Review Batch</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Review queue staged from failure-weighted mistake ledger.</p>
+        </div>
+
+        <!-- IDEA 1: Pre-Flight Queue Metadata Breakdown -->
+        <div class="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs">
+          <div>
+            <span class="text-gray-400 block text-[11px]">Batch Size</span>
+            <strong id="staging-total-cards" class="text-base font-bold text-gray-900 dark:text-white">10 Cards</strong>
+          </div>
+          <div>
+            <span class="text-gray-400 block text-[11px]">High-Yield Traps</span>
+            <strong id="staging-starred-count" class="text-base font-bold text-amber-500">0 ★</strong>
+          </div>
+          <div>
+            <span class="text-gray-400 block text-[11px]">Est. Duration</span>
+            <strong id="staging-est-time" class="text-base font-bold text-ms-blue">~12 mins</strong>
+          </div>
+        </div>
+
+        <!-- IDEA 1: Subject Composition Chips -->
+        <div class="space-y-1.5">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">Queue Subject Composition</span>
+          <div id="staging-subject-chips" class="flex items-center justify-center gap-1.5 flex-wrap text-xs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- IDEA 3: Pacing Intensity Selector -->
+        <div class="space-y-2 text-left pt-2 border-t border-gray-100 dark:border-gray-800">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block text-center">Select Session Pacing Mode</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="app.setPacingIntensity('standard')" id="btn-pace-standard" class="pace-pill p-2.5 rounded-xl border border-ms-blue bg-blue-50 dark:bg-blue-950/60 text-ms-blue font-bold text-xs text-center transition shadow-sm">
+              <span class="block text-sm">🎯 Standard</span>
+              <span class="text-[10px] font-normal opacity-80">Full timer</span>
+            </button>
+            <button type="button" onclick="app.setPacingIntensity('blitz')" id="btn-pace-blitz" class="pace-pill p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs text-center hover:border-amber-400 transition">
+              <span class="block text-sm">⚡ Blitz</span>
+              <span class="text-[10px] font-normal opacity-80">-30% time</span>
+            </button>
+            <button type="button" onclick="app.setPacingIntensity('flash')" id="btn-pace-flash" class="pace-pill p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs text-center hover:border-rose-400 transition">
+              <span class="block text-sm">🔥 Flash</span>
+              <span class="text-[10px] font-normal opacity-80">15s mental</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- IDEA 2 & 4: Exam Lockdown & Scratch Sheet Checklist -->
+        <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 text-left space-y-2 text-xs">
+          <!-- Idea 4: Scratch Sheet Discipline -->
+          <label class="flex items-center gap-2.5 cursor-pointer text-gray-700 dark:text-gray-300 select-none font-medium">
+            <input type="checkbox" id="chk-scratch-ready" checked class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
+            <span>Rough scratch sheet & pen ready (no textbook / notes)</span>
+          </label>
+          <!-- Idea 2: Auto-Fullscreen Exam Lockdown -->
+          <label class="flex items-center gap-2.5 cursor-pointer text-gray-700 dark:text-gray-300 select-none font-medium">
+            <input type="checkbox" id="chk-exam-lockdown" class="w-4 h-4 rounded text-ms-blue focus:ring-ms-blue accent-ms-blue cursor-pointer">
+            <span>Exam Lockdown (Auto-enter Fullscreen on start)</span>
+          </label>
+        </div>
+
+        <!-- Start Trigger Button -->
+        <div class="pt-2">
+          <button onclick="app.startActiveReviewSession()" class="w-full py-3.5 px-6 rounded-xl bg-ms-blue hover:bg-ms-hover text-white text-sm font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition transform active:scale-[0.98]">
+            <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            <span>Start Session Now</span>
+          </button>
+          <span class="text-[11px] text-gray-400 block mt-2">Countdown timer begins on Question #1 when you click Start.</span>
+        </div>
+
+      </div>
       
-      <div id="review-active-panel" class="space-y-6">
+      <!-- ================= 2. ACTIVE QUESTION PANEL ================= -->
+      <div id="review-active-panel" class="hidden space-y-6">
         
         <div class="bg-white dark:bg-[#1E1E1E] rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-3">
@@ -324,6 +405,7 @@
 
       </div>
 
+      <!-- ================= 3. SESSION COMPLETE PANEL ================= -->
       <div id="review-complete-panel" class="hidden max-w-xl mx-auto bg-white dark:bg-[#1E1E1E] rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-800 text-center space-y-6 my-8">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
           <i data-lucide="award" class="w-8 h-8"></i>
@@ -622,7 +704,7 @@
 
       </div>
 
-      <!-- Restored 3 Daily Review Slots & Schedule Management -->
+      <!-- 3 Daily Review Slots & Quota Management -->
       <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-200 dark:border-gray-800 space-y-6">
         <div>
           <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">3 Daily Review Slots & Schedule</h3>
@@ -855,6 +937,7 @@
       timeElapsed: 0,
       isOvertime: false,
       isFlashMode: false,
+      selectedPacing: 'standard', // 'standard' | 'blitz' | 'flash'
       bulkBatchCount: 0,
       currentSlot: 'morning',
       currentBankFilter: 'ALL',
@@ -1173,6 +1256,35 @@
         });
       },
 
+      // Pacing Intensity Selector (Idea 3)
+      setPacingIntensity(mode) {
+        this.selectedPacing = mode;
+        document.querySelectorAll('.pace-pill').forEach(btn => {
+          btn.className = 'pace-pill p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-xs text-center hover:border-ms-blue transition';
+        });
+
+        const activeBtn = document.getElementById(`btn-pace-${mode}`);
+        if (activeBtn) {
+          activeBtn.className = 'pace-pill p-2.5 rounded-xl border border-ms-blue bg-blue-50 dark:bg-blue-950/60 text-ms-blue font-bold text-xs text-center transition shadow-sm';
+        }
+
+        // Recalculate estimated session time in lobby
+        this.updateStagingEstTime();
+      },
+
+      updateStagingEstTime() {
+        const timeElem = document.getElementById('staging-est-time');
+        if (!timeElem) return;
+        let totalSecs = 0;
+        this.currentReviewQueue.forEach(q => {
+          if (this.selectedPacing === 'flash') totalSecs += 15;
+          else if (this.selectedPacing === 'blitz') totalSecs += Math.round((q.allocatedTime || 120) * 0.7);
+          else totalSecs += (q.allocatedTime || 120);
+        });
+        const estMins = Math.max(1, Math.ceil(totalSecs / 60));
+        timeElem.textContent = `~${estMins} mins`;
+      },
+
       toggleFlashMode() {
         this.isFlashMode = !this.isFlashMode;
         const btn = document.getElementById('flash-mode-btn');
@@ -1257,6 +1369,7 @@
         if (currentQ) this.deleteQuestion(currentQ.id);
       },
 
+      // Session Staging Launcher (Prepares queue & shows Staging Lobby)
       launchSlotReview(slot) {
         this.currentSlot = slot;
         const quotaMap = {
@@ -1290,11 +1403,8 @@
           this.showToast(`🔒 ${lockedCount} cards in 12h cooling lockout for retention.`);
         }
 
-        document.getElementById('review-active-panel')?.classList.remove('hidden');
-        document.getElementById('review-complete-panel')?.classList.add('hidden');
-
         const weightedPool = poolToUse.map(q => {
-          const failureCount = (q.attempts.incorrect || 0) + (q.attempts.gaveUp || 0);
+          const failureCount = (q.attempts?.incorrect || 0) + (q.attempts?.gaveUp || 0);
           const starBoost = q.is_starred ? 3 : 0;
           return { item: q, weight: 1 + (failureCount * 2.5) + starBoost };
         });
@@ -1321,7 +1431,9 @@
         this.currentReviewQueue = shuffled;
         this.currentCardIndex = 0;
         this.switchTab('review');
-        this.renderCurrentCard();
+
+        // Present Staging Lobby (No timer starts yet!)
+        this.showStagingLobby(slot);
       },
 
       launchStarredReview() {
@@ -1332,11 +1444,68 @@
         }
         this.currentReviewQueue = [...starred];
         this.currentCardIndex = 0;
-        document.getElementById('review-active-panel')?.classList.remove('hidden');
-        document.getElementById('review-complete-panel')?.classList.add('hidden');
         this.switchTab('review');
+        this.showStagingLobby('starred');
+      },
+
+      // Renders Lobby Card with Ideas 1, 2, 3, 4
+      showStagingLobby(slot) {
+        clearInterval(this.timerInterval);
+        document.getElementById('review-active-panel')?.classList.add('hidden');
+        document.getElementById('review-complete-panel')?.classList.add('hidden');
+        
+        const lobby = document.getElementById('review-staging-panel');
+        if (lobby) lobby.classList.remove('hidden');
+
+        const titles = {
+          morning: '☀️ Morning Review Batch',
+          midday: '🌤️ Midday Sprint',
+          evening: '🌙 Evening Deep Dive',
+          starred: '★ High-Yield Starred Sprint'
+        };
+        const titleElem = document.getElementById('staging-slot-title');
+        if (titleElem) titleElem.textContent = titles[slot] || 'Practice Session';
+
+        const totalElem = document.getElementById('staging-total-cards');
+        if (totalElem) totalElem.textContent = `${this.currentReviewQueue.length} Cards`;
+
+        const starCount = this.currentReviewQueue.filter(q => q.is_starred).length;
+        const starElem = document.getElementById('staging-starred-count');
+        if (starElem) starElem.textContent = `${starCount} ★`;
+
+        // Render queue subject composition chips (Idea 1)
+        const subCounts = {};
+        this.currentReviewQueue.forEach(q => {
+          subCounts[q.subject] = (subCounts[q.subject] || 0) + 1;
+        });
+
+        const subIcons = { Physics: '⚛️', Chemistry: '🧪', Botany: '🌿', Zoology: '🧬' };
+        const chipsContainer = document.getElementById('staging-subject-chips');
+        if (chipsContainer) {
+          chipsContainer.innerHTML = Object.entries(subCounts).map(([sub, count]) => `
+            <span class="px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold">
+              ${subIcons[sub] || '📌'} ${sub}: <strong>${count}</strong>
+            </span>
+          `).join('');
+        }
+
+        // Set default pacing intensity & estimated time
+        this.setPacingIntensity('standard');
+        lucide.createIcons();
+      },
+
+      // START BUTTON TRIGGER (Leaves Lobby, Enters Practice)
+      startActiveReviewSession() {
+        // Idea 2: Fullscreen Lockdown Trigger
+        const isLockdown = document.getElementById('chk-exam-lockdown')?.checked;
+        if (isLockdown && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+
+        // Hide staging lobby, unhide solving panel, begin card #1
+        document.getElementById('review-staging-panel')?.classList.add('hidden');
+        document.getElementById('review-active-panel')?.classList.remove('hidden');
         this.renderCurrentCard();
-        this.showToast(`Loaded ${starred.length} High-Yield Starred Questions!`);
       },
 
       renderCurrentCard() {
@@ -1413,7 +1582,11 @@
 
         this.updateCurrentStarBtnUI(q.is_starred);
         
-        const duration = this.isFlashMode ? 15 : (q.allocatedTime || 120);
+        // Timer duration calculation based on selected lobby pacing (Idea 3)
+        let duration = q.allocatedTime || 120;
+        if (this.selectedPacing === 'flash' || this.isFlashMode) duration = 15;
+        else if (this.selectedPacing === 'blitz') duration = Math.max(20, Math.round(duration * 0.7));
+
         this.startCardTimer(duration);
         lucide.createIcons();
       },
@@ -1428,7 +1601,7 @@
         const fill = document.getElementById('timer-progress-fill');
         const label = document.getElementById('timer-status-label');
         if (label) {
-          label.textContent = this.isFlashMode ? 'Flash Pacing' : 'Time Remaining';
+          label.textContent = (this.selectedPacing === 'flash' || this.isFlashMode) ? 'Flash Pacing' : (this.selectedPacing === 'blitz' ? 'Blitz Pacing' : 'Time Remaining');
           label.className = 'text-[10px] uppercase font-bold text-gray-400';
         }
         if (display) display.className = 'font-mono text-2xl font-bold tracking-tight text-ms-blue';
@@ -1721,7 +1894,6 @@
         this.questionBank.unshift(newQ);
         this.saveBankToStorage(true, newQ);
 
-        // CONTINUOUS INGESTION LOGIC
         if (isBulk) {
           this.bulkBatchCount++;
           const counter = document.getElementById('bulk-batch-counter');
@@ -1987,7 +2159,7 @@
             this.currentReviewQueue = [q];
             this.currentCardIndex = 0;
             this.switchTab('review');
-            this.renderCurrentCard();
+            this.showStagingLobby('custom');
           };
         }
 
